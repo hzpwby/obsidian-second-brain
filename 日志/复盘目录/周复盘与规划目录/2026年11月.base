@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "日志/周复盘/2026年/2026年11月"
+views:
+  - type: cards
+    name: 11月
+    order:
+      - file.name
+    cardSize: 310

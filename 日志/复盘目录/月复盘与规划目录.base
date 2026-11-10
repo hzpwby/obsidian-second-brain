@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "日志/复盘目录/月复盘与规划目录"
+views:
+  - type: cards
+    name: 表格
+    order:
+      - file.basename
+    cardSize: 340

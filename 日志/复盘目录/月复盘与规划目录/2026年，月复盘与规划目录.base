@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "日志/月复盘/2026年"
+views:
+  - type: cards
+    name: 表格
+    order:
+      - file.basename
+    cardSize: 490

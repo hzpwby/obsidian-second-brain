@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深空风格模板</title>
+<!-- ═════════════════════════════════════════════════════════════════════
+  深空风格文档模板 · 2026-10-12
+  风格提取自《教学系统搭建方案》页面——只留样式与组件骨架，无任何业务内容。
+  复用方法：复制本文件 → 改 <title> 与 hero 标题 → 照下方组件样例替换占位文字。
+
+  组件速查（<style> 为冻结公共层，复用时不要改）：
+    section.chapter            一个章节（配 .ch-no 眉号 / .ch-title 大标题 / .ch-sub 副题）
+    .card                      深空卡片（四角青色角标）；卡内常用：
+      .tag                     卡片左上主题标签
+      .role                    一句话说明条（青字浅底圆角框）
+      ul.pts > li              列表：li.b ▸青 / li.ok ✓绿 / li.todo ◇琥珀 / li.wip △紫
+      .flowline > .fl-node(.y) + .fl-arrow   横向流程节点（.y 琥珀变体），箭头 →
+      .dataflow                等宽字体数据流/目录树块（注意源码换行会原样渲染）
+        span.k 青 / span.a 琥珀 / span.g 绿 / span.d 琥珀加粗＝行尾备注（← 说明、▼ 步骤）
+    .whygrid > .why            两列网格卡片（.wn 序号块 / h5 小标题 / p 说明）
+    h4.part（✓）/ h4.part.todo（◇）  章节内小节横幅（绿＝已定 / 琥珀＝待办）
+    .chip / .chip.y            hero 区圆角小标签（青 / 琥珀）
+    em 行内青色强调；b/strong 全局琥珀加粗；.foot 页脚落款
+  全局机制：.rv 入场渐显（可加 .d1 .d2 .d3 延迟）；#prog 顶部进度条；
+            #nav 右侧锚点导航（窄屏自动隐藏）；滚动条进度随 JS 自动更新。
+═══════════════════════════════════════════════════════════════════════ -->
+<style>
+:root{
+  --bg0:#04070e; --cyan:#3ee6ff; --amber:#ffc94d; --green:#41ffa3; --red:#ff5a76; --violet:#b78cff;
+  --ink:#e9f3ff; --dim:#8aa3c4; --dim2:#5f7699;
+  --line:rgba(62,230,255,.25); --line2:rgba(62,230,255,.55);
+  --font:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--ink);font-size:16px;line-height:1.78;
+  background:
+    radial-gradient(900px 520px at 85% -8%, rgba(62,230,255,.13), transparent 60%),
+    radial-gradient(800px 520px at -10% 30%, rgba(183,140,255,.10), transparent 60%),
+    linear-gradient(160deg,#04070e 0%,#071120 55%,#050a14 100%);
+  background-attachment:fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+  background-image:linear-gradient(rgba(62,230,255,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(62,230,255,.05) 1px,transparent 1px);
+  background-size:42px 42px;
+  -webkit-mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%);
+          mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.13;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.5) 0 2px,transparent 2px 4px)}
+b,strong{font-weight:900;color:var(--amber)}
+#wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 18px 90px}
+#prog{position:fixed;left:0;top:0;height:3px;width:0;z-index:99;background:linear-gradient(90deg,var(--cyan),var(--amber));box-shadow:0 0 12px rgba(62,230,255,.8)}
+#nav{position:fixed;right:14px;top:50%;transform:translateY(-50%);z-index:50;display:flex;flex-direction:column;gap:7px}
+#nav a{width:34px;height:34px;border:1px solid var(--line);border-radius:9px;background:rgba(4,10,20,.82);color:var(--dim);font-size:12px;font-weight:900;display:flex;align-items:center;justify-content:center;text-decoration:none;transition:.15s}
+#nav a:hover{border-color:var(--line2);color:var(--cyan)}
+@media(max-width:1180px){#nav{display:none}}
+.rv{opacity:0;transform:translateY(36px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+.chip{display:inline-block;font-size:11.5px;border:1px solid var(--line);border-radius:20px;padding:2px 11px;color:#bfeeff;background:rgba(62,230,255,.06)}
+.chip.y{color:#ffe6ad;border-color:rgba(255,201,77,.4);background:rgba(255,201,77,.07)}
+.card{border:1px solid var(--line);border-radius:15px;padding:20px 22px;position:relative;
+  background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95));
+  box-shadow:0 0 28px rgba(62,230,255,.10), inset 0 0 36px rgba(4,10,20,.5)}
+.card::before,.card::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.card::before{left:-1px;top:-1px;border-left:3px solid var(--cyan);border-top:3px solid var(--cyan)}
+.card::after{right:-1px;bottom:-1px;border-right:3px solid var(--cyan);border-bottom:3px solid var(--cyan)}
+section.chapter{padding:90px 0 8px}
+.ch-no{font-size:13px;letter-spacing:6px;color:var(--dim2)}
+.ch-title{font-size:32px;font-weight:900;letter-spacing:3px;color:#fff;text-shadow:0 0 16px rgba(62,230,255,.55);margin:8px 0 6px}
+.ch-sub{font-size:14.5px;color:var(--dim);margin-bottom:26px;max-width:860px}
+h3.mini{font-size:16px;color:var(--cyan);letter-spacing:1px;margin:0 0 10px;font-weight:900}
+.tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--cyan);border:1px solid var(--line2);border-radius:20px;padding:2px 13px;background:rgba(62,230,255,.08)}
+ul.pts{list-style:none;padding:0}
+ul.pts li{padding:4px 0 4px 24px;position:relative;font-size:14px;color:#d7e8fb;line-height:1.85}
+ul.pts li::before{position:absolute;left:2px;font-weight:900}
+li.ok::before{content:"✓";color:var(--green)} li.todo::before{content:"◇";color:var(--amber)} li.wip::before{content:"△";color:var(--violet)}
+li.b::before{content:"▸";color:var(--cyan);font-size:12px;top:6px}
+em{font-style:normal;color:var(--cyan)}
+h4.part{font-size:20px;color:#fff;letter-spacing:2px;margin:36px 0 12px;font-weight:900;padding:10px 16px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;background:linear-gradient(90deg,rgba(65,255,163,.14),rgba(65,255,163,.03) 55%,transparent);text-shadow:0 0 12px rgba(65,255,163,.35)}
+h4.part.todo{border-left-color:var(--amber);background:linear-gradient(90deg,rgba(255,201,77,.14),rgba(255,201,77,.03) 55%,transparent);text-shadow:0 0 12px rgba(255,201,77,.35)}
+.role{font-size:13.5px;color:#bfeeff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:rgba(62,230,255,.05);margin:12px 0 8px;line-height:1.8}
+.board{margin:16px 0}
+.flowline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin:10px 0 6px 24px}
+.fl-node{border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700;background:rgba(62,230,255,.06);color:#d7f2ff;text-align:center}
+.fl-node.y{border-color:rgba(255,201,77,.5);background:rgba(255,201,77,.07);color:#ffe9c2}
+.fl-arrow{color:var(--dim2);font-size:15px}
+.whygrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:840px){.whygrid{grid-template-columns:1fr}}
+.why{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95))}
+.why .wn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;border:1.5px solid var(--line2);color:var(--cyan);font-weight:900;margin-bottom:8px;background:rgba(62,230,255,.08)}
+.why h5{font-size:15.5px;color:#fff;letter-spacing:1px;margin-bottom:5px}
+.why p{font-size:13px;color:var(--dim);line-height:1.85}
+.dataflow{font-family:Consolas,"Courier New",monospace;font-size:12.5px;line-height:2;color:#bfe0ff;background:#050c17;border:1px solid var(--line);border-radius:11px;padding:16px 20px;white-space:pre-wrap}
+.dataflow .k{color:var(--cyan)} .dataflow .a{color:var(--amber)} .dataflow .d{color:var(--amber);font-weight:900} .dataflow .g{color:var(--green)}
+#hero{min-height:92vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.hero-kicker{font-size:13px;letter-spacing:8px;color:var(--dim)}
+.hero-title{font-size:48px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 26px rgba(62,230,255,.7);margin:16px 0 8px}
+.hero-title em{font-style:normal;color:var(--cyan)}
+.hero-sub{font-size:16px;color:var(--dim);max-width:760px}
+.scroll-hint{margin-top:46px;font-size:12px;letter-spacing:4px;color:var(--dim2);animation:blink 1.6s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.foot{text-align:center;font-size:11px;color:var(--dim2);letter-spacing:1px;line-height:2;margin-top:70px}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<!-- 右侧锚点导航：一个 <a> 对应一个章节 id，单字为好；不需要可整行删除 -->
+<div id="nav"><a href="#hero">◉</a><a href="#s1">壹</a><a href="#s2">贰</a><a href="#s3">叁</a></div>
+<div id="wrap">
+
+<!-- ══════════ 首屏 HERO：改标题与副题即可 ══════════ -->
+<section id="hero">
+  <div class="hero-kicker rv">DEEP SPACE TEMPLATE · 深空风格模板</div>
+  <h1 class="hero-title rv d1">深空风格<em>文档模板</em></h1>
+  <p class="hero-sub rv d2">这里是副题占位——一句话说明这份文档讲什么。<br>本页只含样式与组件样例：复制本文件，替换占位文字，即是新文档。</p>
+  <div class="rv d3" style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+    <span class="chip">标签一 · 占位</span>
+    <span class="chip">标签二 · 占位</span>
+    <span class="chip y">琥珀标签 · 占位</span>
+  </div>
+  <div class="scroll-hint">▾ 向下滚动 ▾</div>
+</section>
+
+<!-- ══════════ 章节一：whygrid 网格卡片 ══════════ -->
+<section class="chapter" id="s1">
+  <div class="ch-no rv">SECTION 1 · 网格卡片</div>
+  <h2 class="ch-title rv">章节大标题占位</h2>
+  <p class="ch-sub rv">章节副题占位——一句话概括本章内容。下面是 whygrid 两列网格卡片的样例。</p>
+
+  <div class="whygrid" style="margin-top:10px">
+    <div class="why rv"><div class="wn">1</div><h5>卡片标题一</h5><p>说明文字占位——写一两句这个要点的意思，<b>关键处加粗</b>会变琥珀色。</p></div>
+    <div class="why rv"><div class="wn">2</div><h5>卡片标题二</h5><p>说明文字占位——每个格子独立成卡，格子数量随意，两列自动排布。</p></div>
+    <div class="why rv"><div class="wn">3</div><h5>卡片标题三</h5><p>说明文字占位——窄屏自动变单列，不用额外处理。</p></div>
+    <div class="why rv"><div class="wn">4</div><h5>卡片标题四</h5><p>说明文字占位——序号块 .wn、小标题 h5、说明 p 三件套。</p></div>
+  </div>
+</section>
+
+<!-- ══════════ 章节二：卡片 / 流程 / 数据流 ══════════ -->
+<section class="chapter" id="s2">
+  <div class="ch-no rv">SECTION 2 · 卡片与流程</div>
+  <h2 class="ch-title rv">深空卡片的三种内件</h2>
+  <p class="ch-sub rv">卡片 .card 是全文档的主体容器——内放主题标签、说明条、列表、流程线、数据流块。</p>
+
+  <div class="card rv board">
+    <span class="tag">卡片样例一 · 标签＋说明条＋列表</span>
+    <p class="role">这是一句话说明条（.role）——概括这张卡片讲什么。</p>
+    <ul class="pts">
+      <li class="b"><b>▸ 普通条目</b>：最常用；<em>em 是青色强调</em>，行内代码用 <code>code</code> 样式。</li>
+      <li class="ok">绿色对勾条目（li.ok）——表示已完成 / 已确认的事。</li>
+      <li class="todo">琥珀待办条目（li.todo）——表示还没做的事。</li>
+      <li class="wip">紫色进行中条目（li.wip）——表示正在做。</li>
+    </ul>
+  </div>
+
+  <div class="card rv board">
+    <span class="tag">卡片样例二 · 横向流程线</span>
+    <div class="flowline" style="margin-left:0">
+      <div class="fl-node">节点一<br><span style="font-size:11.5px;font-weight:400">小字补充说明</span></div>
+      <span class="fl-arrow">→</span>
+      <div class="fl-node">节点二<br><span style="font-size:11.5px;font-weight:400">小字补充说明</span></div>
+      <span class="fl-arrow">→</span>
+      <div class="fl-node y">琥珀节点<br><span style="font-size:11.5px;font-weight:400">重点环节用 .y</span></div>
+    </div>
+    <ul class="pts" style="margin-top:8px">
+      <li class="b">节点数量随意，自动换行；箭头用 <code>→</code> 字符。</li>
+    </ul>
+  </div>
+
+  <div class="card rv board">
+    <span class="tag">卡片样例三 · 数据流 / 目录树</span>
+    <p class="role">.dataflow 等宽字体块——流程图、目录树都用它；行尾琥珀备注用 span.d（← 说明、▼ 步骤）。注意：源码里的换行和缩进会原样渲染。</p>
+    <div class="dataflow"><span class="k">起点（青色 span.k）</span> ——流程或结构的名字
+  <span class="d">▼ 步骤推进备注（琥珀加粗 span.d）</span>
+<span class="k">第二层</span>（可夹 <span class="a">琥珀强调 span.a</span> 与 <span class="g">绿色强调 span.g</span>）
+├── <span class="a">子项一/</span>            <span class="d">← 行尾备注：目录树也用这个块画</span>
+│   └── 子项二
+└── <span class="a">子项三/</span>
+  <span class="d">▼ 再一步</span>
+<span class="g">终点（绿色）</span></div>
+  </div>
+</section>
+
+<!-- ══════════ 章节三：小节横幅 ══════════ -->
+<section class="chapter" id="s3">
+  <div class="ch-no rv">SECTION 3 · 小节横幅</div>
+  <h2 class="ch-title rv">章节内的小节划分</h2>
+  <p class="ch-sub rv">一章内用 h4.part 分小节——绿色横幅＝已定稿内容，琥珀横幅（加 .todo）＝待办内容。</p>
+
+  <h4 class="part rv">✓ 第一部分 · 已定稿小节占位</h4>
+
+  <div class="card rv board">
+    <span class="tag">小节标题占位</span>
+    <ul class="pts">
+      <li class="b"><b>要点一</b>：正文占位——写清这件事的规则或结论。</li>
+      <li class="b"><b>要点二</b>：正文占位——一篇文档由「hero → 若干章节 → 页脚」组成。</li>
+    </ul>
+  </div>
+
+  <h4 class="part todo rv">◇ 第二部分 · 待办小节占位</h4>
+
+  <div class="card rv board">
+    <span class="tag">待办条目占位</span>
+    <ul class="pts">
+      <li class="todo"><b>待办一</b>：要做的动作写这里，做完可把横幅换成绿色 ✓ 态。</li>
+      <li class="todo"><b>待办二</b>：占位正文。</li>
+    </ul>
+  </div>
+</section>
+
+<div class="foot rv">深空风格模板 · 2026-10-12 · 风格提取自《教学系统搭建方案》<br>复用＝复制本文件替换占位内容——style 公共层冻结不要改</div>
+</div>
+<script>
+"use strict";
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('prog').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100).toFixed(2)+'%'},{passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+	"nodes":[
+		{"id":"a2d4810f6c3b57e2","type":"text","text":"```tracker\nsearchType: task.done\nsearchTarget: 健身打卡\nfolder: 日志/日复盘\nstartDate: 2026-09-23\ndatasetName: 健身\nfixedScale: 0.7\nmonth:\n    mode: circle\n    color: green\n```","x":-775,"y":-370,"width":300,"height":333,"color":"1"},
+		{"id":"c4f6831b5a7e290d","type":"text","text":"```tracker\nsearchType: text\nsearchTarget: '\\*\\*体重\\*\\*: ?(?<value>[0-9]+(\\.[0-9]+)?)'\nfolder: 日志/日复盘\nstartDate: 2026-09-23\ndatasetName: 体重\nfixedScale: 0.7\nline:\n    title: 📈 体重变化趋势（kg）\n    lineColor: '#4CAF50'\n    yMin: 50\n    yMax: 80\n    showPoint: true\n    xAxisTickLabelFormat: YY-M-DD\n    xAxisLabel: ' '\n    yAxisLabel: ' '\n```","x":-475,"y":-370,"width":300,"height":333,"color":"2"},
+		{"id":"d5a7942c6b8f301e","type":"text","text":"```tracker\nsearchType: text\nsearchTarget: '\\*\\*睡眠时长\\*\\*: ?(?<value>[0-9]+(\\.[0-9]+)?)'\nfolder: 日志/日复盘\nstartDate: 2026-09-23\ndatasetName: 睡眠\nfixedScale: 0.7\nline:\n    title: 📈 睡眠时长趋势（小时）\n    lineColor: '#2196F3'\n    yMin: 0\n    showPoint: true\n    xAxisTickLabelFormat: YY-M-DD\n    xAxisLabel: ' '\n    yAxisLabel: ' '\n```","x":-475,"y":-43,"width":300,"height":343,"color":"6"},
+		{"id":"b9e5720a4d6f38c1","type":"text","text":"```tracker\nsearchType: task.done\nsearchTarget: 阅读打卡\nfolder: 日志/日复盘\nstartDate: 2026-09-23\ndatasetName: 阅读\nfixedScale: 0.7\nmonth:\n    mode: circle\n    color: orange\n```","x":-775,"y":-43,"width":300,"height":343,"color":"1"},
+		{"id":"e6b8a53d7c90412f","type":"text","text":"#  行动\n[[起念]]\n[[系统迭代待办]]\n[[（自己添加大项目）待办]]","x":-980,"y":-370,"width":205,"height":327,"color":"1"},
+		{"id":"47cb07939b1a428e","type":"text","text":"#  菜谱\n[[荤菜.base|荤菜]]\n[[素菜.base|素菜]]\n[[汤.base|汤]]\n[[早餐.base|早餐]]\n[[主食.base|主食]]","x":-1122,"y":-370,"width":140,"height":327,"color":"#f5dd42"},
+		{"id":"08dac75f9e126341","type":"text","text":"#  复盘\n[[周复盘与规划目录.base|周复盘]]\n[[月复盘与规划目录.base|月复盘]]\n[[年复盘与规划目录.base|年复盘]]","x":-1122,"y":-43,"width":142,"height":343,"color":"#f5dd42"},
+		{"id":"f7c9b64e8d015230","type":"text","text":"#  知识\n[[书籍目录.base|图书馆]]\n\n[[待处理笔记.base|待处理笔记]]\n[[常青笔记.base|常青笔记]]\n[[系统笔记.base|系统笔记]]","x":-980,"y":-43,"width":205,"height":343,"color":"3"}
+	],
+	"edges":[]
+}

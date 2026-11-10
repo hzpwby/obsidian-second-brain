@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日任务推进 · 种子模板</title>
+<!--
+  每日任务推进 · 种子模板（向导版的自足种子：脚本 / 样式 / 四级阶梯表全内嵌）
+  用途：看板链条断了（当天文件被删、换电脑从零开始）时——双击本文件 →
+  点右上「新一天」→（首次授权日志文件夹）→ 扫今天的日志 md → 生成明天的看板
+  （生成物自带每日仪式：生成当晚一次 + 使用当天一次，之后永不触发）。
+  本文件不承载任何一天的具体内容，也不要拿它当每日看板用；
+  要补做某一天的内容，找 AI 从那天的日志重建。
+  板块二、三是「复杂增量拆解」的占位样式板：板块二往后全是复杂增量——
+  一条增量一个板块，两条就加板块三，以此类推；子任务按四要素写
+  （要完成什么 → 现状 → 目标 → 预估时间），全勾联动总览。
+  提取自 2026-10-13 向导版看板；style 公共层冻结。-->
+<style>
+:root{
+  --bg0:#04070e; --cyan:#3ee6ff; --amber:#ffc94d; --green:#41ffa3; --red:#ff5a76; --violet:#b78cff;
+  --ink:#e9f3ff; --dim:#8aa3c4; --dim2:#5f7699;
+  --line:rgba(62,230,255,.25); --line2:rgba(62,230,255,.55);
+  --font:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+  --sidew:264px; --rwidth:240px; --toph:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--ink);font-size:16px;line-height:1.78;
+  background:
+    radial-gradient(900px 520px at 85% -8%, rgba(62,230,255,.13), transparent 60%),
+    radial-gradient(800px 520px at -10% 30%, rgba(183,140,255,.10), transparent 60%),
+    linear-gradient(160deg,#04070e 0%,#071120 55%,#050a14 100%);
+  background-attachment:fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+  background-image:linear-gradient(rgba(62,230,255,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(62,230,255,.05) 1px,transparent 1px);
+  background-size:42px 42px;
+  -webkit-mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%);
+          mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.13;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.5) 0 2px,transparent 2px 4px)}
+b,strong{font-weight:900;color:var(--amber)}
+
+/* ============ 顶部板块页签栏 ============ */
+#topbar{position:fixed;left:0;right:0;top:0;height:var(--toph);z-index:90;display:flex;align-items:center;gap:16px;
+  padding:0 18px;background:rgba(4,10,20,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.tb-brand{display:flex;align-items:center;gap:9px;font-size:14.5px;color:#fff;font-weight:900;letter-spacing:1px;white-space:nowrap}
+.sb-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.tb-brand i{font-style:normal;font-size:11px;color:var(--dim2);font-weight:400;margin-left:2px}
+#tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;height:100%}
+#tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;color:var(--dim);font:900 13.5px/1 var(--font);letter-spacing:1px;
+  padding:0 13px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;height:100%}
+.tab:hover{color:#d7f2ff}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);text-shadow:0 0 12px rgba(62,230,255,.5)}
+#nextday{margin-left:auto;flex:none;border:1px solid var(--line2);background:rgba(62,230,255,.08);color:var(--cyan);
+  font:900 12.5px/1 var(--font);letter-spacing:2px;padding:9px 14px;border-radius:18px;cursor:pointer;transition:.15s;white-space:nowrap}
+#nextday:hover{box-shadow:0 0 14px rgba(62,230,255,.35);color:#fff}
+@media(max-width:640px){.tb-brand i{display:none}.tb-brand b{font-size:13px}#nextday{padding:7px 10px}}
+
+/* ============ 左侧目录栏 ============ */
+#side{position:fixed;left:0;top:var(--toph);bottom:0;width:var(--sidew);z-index:60;overflow-y:auto;overscroll-behavior:contain;
+  background:linear-gradient(180deg,rgba(8,16,30,.97),rgba(4,9,18,.98));
+  border-right:1px solid var(--line);padding:16px 14px 26px;display:flex;flex-direction:column;
+  box-shadow:6px 0 30px rgba(0,0,0,.35);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#side::-webkit-scrollbar{width:5px}
+#side::-webkit-scrollbar-thumb{background:rgba(62,230,255,.16);border-radius:3px}
+.side-group{font-size:10.5px;letter-spacing:3px;color:var(--dim2);margin:16px 8px 6px}
+.side-link{display:block;padding:8px 12px;margin:2px 0;border-radius:9px;font-size:13.5px;color:var(--dim);
+  text-decoration:none;border-left:2px solid transparent;transition:.15s;line-height:1.5}
+.side-link:hover{color:#d7f2ff;background:rgba(62,230,255,.06)}
+.side-link.on{color:var(--cyan);background:rgba(62,230,255,.08);border-left-color:var(--cyan);text-shadow:0 0 10px rgba(62,230,255,.45)}
+.side-sub{display:block;margin:1px 0 1px 22px;padding:5px 10px;border-radius:8px;font-size:12.5px;color:var(--dim2);
+  text-decoration:none;border-left:2px solid rgba(62,230,255,.14);transition:.15s;line-height:1.5}
+.side-sub:hover{color:#bfeeff;background:rgba(62,230,255,.05)}
+.side-sub.on{color:#8ff0ff;background:rgba(62,230,255,.07);border-left-color:var(--cyan)}
+.side-foot{margin-top:auto;padding:14px 8px 0;font-size:10.5px;color:var(--dim2);letter-spacing:1px;border-top:1px dashed var(--line)}
+
+/* ============ 主内容区 ============ */
+#main{margin-left:var(--sidew);margin-right:var(--rwidth);margin-top:var(--toph);position:relative;z-index:1;
+  transition:margin-left .28s cubic-bezier(.4,0,.2,1),margin-right .28s cubic-bezier(.4,0,.2,1)}
+#wrap{max-width:920px;margin:0 auto;padding:0 26px 90px}
+#prog{position:fixed;left:0;top:0;height:3px;width:0;z-index:99;background:linear-gradient(90deg,var(--cyan),var(--amber));box-shadow:0 0 12px rgba(62,230,255,.8)}
+
+/* ============ 侧栏开合 ============ */
+#burger{position:fixed;left:calc(var(--sidew) + 14px);top:calc(var(--toph) + 12px);z-index:80;width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(4,10,20,.92);color:var(--cyan);font-size:15px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);
+  transition:left .28s cubic-bezier(.4,0,.2,1)}
+#burger:hover{border-color:var(--line2);box-shadow:0 0 14px rgba(62,230,255,.2)}
+body.side-closed #burger{left:14px}
+#scrim{position:fixed;inset:0;background:rgba(2,5,10,.62);z-index:55;opacity:0;pointer-events:none;transition:opacity .25s}
+body.side-closed #side{transform:translateX(-103%);box-shadow:none}
+body.side-closed #main{margin-left:0}
+
+/* ============ 右侧栏（占位） ============ */
+#sideR{position:fixed;right:0;top:var(--toph);bottom:0;width:var(--rwidth);z-index:60;overflow-y:auto;
+  background:linear-gradient(180deg,rgba(8,16,30,.97),rgba(4,9,18,.98));
+  border-left:1px solid var(--line);padding:16px 14px 26px;display:flex;flex-direction:column;
+  box-shadow:-6px 0 30px rgba(0,0,0,.35);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#sideR::-webkit-scrollbar{width:5px}
+#sideR::-webkit-scrollbar-thumb{background:rgba(62,230,255,.16);border-radius:3px}
+#sideR .side-title{font-size:12px;letter-spacing:2px;color:var(--cyan);font-weight:900;margin:4px 8px 10px}
+body.right-closed #sideR{transform:translateX(103%);box-shadow:none}
+body.right-closed #main{margin-right:0}
+#burgerR{position:fixed;right:calc(var(--rwidth) + 14px);top:calc(var(--toph) + 12px);z-index:80;width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(4,10,20,.92);color:var(--cyan);font-size:15px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);
+  transition:right .28s cubic-bezier(.4,0,.2,1)}
+#burgerR:hover{border-color:var(--line2);box-shadow:0 0 14px rgba(62,230,255,.2)}
+body.right-closed #burgerR{right:14px}
+@media(max-width:960px){
+  #main{margin-left:0;margin-right:0}
+  #side{width:280px}
+  #sideR{width:270px}
+  body:not(.side-closed) #scrim,body:not(.right-closed) #scrim{opacity:1;pointer-events:auto}
+}
+
+/* ============ 板块面板 / 入场动画 ============ */
+.panel{display:none}
+.panel.on{display:block}
+.rv{opacity:0;transform:translateY(36px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* ============ 板块内首屏与部分 ============ */
+#hero{min-height:58vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:56px 0 30px}
+.hero-kicker{font-size:13px;letter-spacing:8px;color:var(--dim)}
+.hero-title{font-size:42px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 26px rgba(62,230,255,.7);margin:14px 0 8px}
+.hero-title em{font-style:normal;color:var(--cyan)}
+.hero-sub{font-size:16px;color:var(--dim);max-width:720px}
+.scroll-hint{margin-top:36px;font-size:12px;letter-spacing:4px;color:var(--dim2);animation:blink 1.6s steps(2) infinite}
+.kbd-hint{margin-top:20px;font-size:11px;color:var(--dim2);letter-spacing:1px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:center}
+.kbd-hint kbd{display:inline-block;font-family:Consolas,"Courier New",monospace;font-size:10.5px;color:var(--cyan);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;background:rgba(62,230,255,.06);margin-right:6px}
+@keyframes blink{50%{opacity:.35}}
+@media(max-width:640px){.hero-title{font-size:30px;letter-spacing:2px}.hero-kicker{letter-spacing:4px;font-size:11.5px}}
+section.chapter{padding:58px 0 8px}
+.ch-no{font-size:13px;letter-spacing:6px;color:var(--dim2)}
+.ch-title{font-size:30px;font-weight:900;letter-spacing:3px;color:#fff;text-shadow:0 0 16px rgba(62,230,255,.55);margin:8px 0 6px}
+.ch-sub{font-size:14.5px;color:var(--dim);margin-bottom:24px;max-width:820px}
+
+/* ============ 卡片组件 ============ */
+.chip{display:inline-block;font-size:11.5px;border:1px solid var(--line);border-radius:20px;padding:2px 11px;color:#bfeeff;background:rgba(62,230,255,.06)}
+.chip.y{color:#ffe6ad;border-color:rgba(255,201,77,.4);background:rgba(255,201,77,.07)}
+.card{border:1px solid var(--line);border-radius:15px;padding:20px 22px;position:relative;
+  background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95));
+  box-shadow:0 0 28px rgba(62,230,255,.10), inset 0 0 36px rgba(4,10,20,.5)}
+.card::before,.card::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.card::before{left:-1px;top:-1px;border-left:3px solid var(--cyan);border-top:3px solid var(--cyan)}
+.card::after{right:-1px;bottom:-1px;border-right:3px solid var(--cyan);border-bottom:3px solid var(--cyan)}
+.tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--cyan);border:1px solid var(--line2);border-radius:20px;padding:2px 13px;background:rgba(62,230,255,.08)}
+ul.pts{list-style:none;padding:0}
+ul.pts li{padding:4px 0 4px 24px;position:relative;font-size:14px;color:#d7e8fb;line-height:1.85}
+ul.pts li::before{position:absolute;left:2px;font-weight:900}
+li.ok::before{content:"✓";color:var(--green)} li.todo::before{content:"◇";color:var(--amber)} li.wip::before{content:"△";color:var(--violet)}
+li.b::before{content:"▸";color:var(--cyan);font-size:12px;top:6px}
+em{font-style:normal;color:var(--cyan)}
+.role{font-size:13.5px;color:#bfeeff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:rgba(62,230,255,.05);margin:12px 0 8px;line-height:1.8}
+.board{margin:16px 0}
+
+/* ============ 勾选条目 ============ */
+.chk{display:block;padding:6px 10px;margin:3px 0;border-radius:8px;cursor:pointer;transition:.15s;
+  font-size:13.5px;color:#d7e8fb;line-height:1.6}
+.chk:hover{background:rgba(62,230,255,.06)}
+.chk input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:5px;
+  vertical-align:-3px;margin-right:10px;cursor:pointer;position:relative;transition:.15s}
+.chk input:checked{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(62,230,255,.5)}
+.chk input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:#04222e}
+.chk:has(input:checked){color:var(--dim2);text-decoration:line-through;text-decoration-color:rgba(62,230,255,.5)}
+
+/* ============ 每日仪式向导 / 滚日表单 ============ */
+.ovl{position:fixed;inset:0;z-index:200;display:none;overflow-y:auto;
+  background:radial-gradient(900px 520px at 85% -8%, rgba(62,230,255,.13), transparent 60%),
+             radial-gradient(800px 520px at -10% 30%, rgba(183,140,255,.10), transparent 60%),
+             linear-gradient(160deg,#04070e 0%,#071120 55%,#050a14 100%)}
+.ovl.on{display:block}
+.wiz-wrap{max-width:1100px;margin:0 auto;padding:7vh 26px 70px}
+.wiz-kicker{font-size:12px;letter-spacing:6px;color:var(--dim2);text-align:center}
+.wiz-title{font-size:32px;font-weight:900;letter-spacing:3px;color:#fff;text-align:center;text-shadow:0 0 22px rgba(62,230,255,.6);margin:12px 0 8px}
+.wiz-sub{font-size:14.5px;color:var(--dim);text-align:center;max-width:780px;margin:0 auto;line-height:1.9}
+.wiz-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:14px;margin:32px 0 6px}
+.lv-card{border:1px solid var(--line);border-radius:15px;padding:16px 18px;position:relative;cursor:pointer;transition:.18s;
+  background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95))}
+.lv-card:hover{border-color:var(--line2)}
+.lv-card.sel{border-color:var(--cyan);box-shadow:0 0 22px rgba(62,230,255,.35),inset 0 0 24px rgba(62,230,255,.06)}
+.lv-badge{position:absolute;top:-10px;right:12px;font-size:10.5px;letter-spacing:2px;color:#04222e;background:var(--amber);
+  border-radius:12px;padding:2px 10px;font-weight:900;display:none}
+.lv-card.badge .lv-badge{display:block}
+.lv-name{font-size:17px;font-weight:900;color:#fff;letter-spacing:2px;display:inline-block}
+.lv-count{font-size:11px;color:var(--dim2);letter-spacing:1px;margin-left:8px}
+.lv-card ul{list-style:none;margin-top:10px;padding:0}
+.lv-card li{font-size:12.5px;line-height:1.95;color:#d7e8fb;padding-left:13px;position:relative}
+.lv-card li::before{content:"·";position:absolute;left:1px;color:var(--dim2)}
+.lv-card li.o2{color:var(--cyan)} .lv-card li.o2::before{color:var(--cyan)}
+.lv-card li.o3{color:var(--amber)} .lv-card li.o3::before{color:var(--amber)}
+.lv-card li.o4{color:var(--green)} .lv-card li.o4::before{color:var(--green)}
+.wiz-list{max-width:780px;margin:32px auto 6px}
+.witem{border:1px solid var(--line);border-radius:12px;padding:13px 18px;margin:10px 0;font-size:14px;color:#d7e8fb;line-height:1.9;background:rgba(13,28,48,.72)}
+.witem .wsub{display:block;font-size:12.5px;color:var(--dim2);margin-top:4px}
+.wiz-foot{text-align:center;margin-top:36px}
+.btn{border:1px solid rgba(255,201,77,.55);background:rgba(255,201,77,.1);color:#ffe6ad;
+  font:900 14px/1 var(--font);letter-spacing:2px;padding:13px 34px;border-radius:22px;cursor:pointer;transition:.15s}
+.btn:hover{background:rgba(255,201,77,.22);box-shadow:0 0 18px rgba(255,201,77,.3);color:#fff}
+.btn.ghost{border-color:var(--line);background:none;color:var(--dim)}
+.btn.ghost:hover{color:#d7f2ff;box-shadow:none;background:rgba(62,230,255,.06)}
+.wiz-dots{display:flex;gap:8px;justify-content:center;margin-top:28px}
+.wiz-dots i{width:22px;height:4px;border-radius:2px;background:rgba(62,230,255,.18)}
+.wiz-dots i.on{background:var(--cyan);box-shadow:0 0 8px rgba(62,230,255,.6)}
+@media(max-width:640px){.wiz-title{font-size:24px}.wiz-cards{grid-template-columns:1fr 1fr}}
+
+/* ============ 提示条 ============ */
+#toast{position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(16px);opacity:0;transition:.25s;
+  background:rgba(8,18,32,.96);border:1px solid var(--line2);color:var(--cyan);font-size:13px;letter-spacing:1px;
+  padding:10px 20px;border-radius:20px;z-index:300;pointer-events:none;box-shadow:0 0 20px rgba(62,230,255,.25)}
+#toast.on{opacity:1;transform:translateX(-50%)}
+
+.foot{text-align:center;font-size:11px;color:var(--dim2);letter-spacing:1px;line-height:2;margin-top:70px}
+</style>
+</head>
+<body>
+<template id="shells">
+<div id="prog"></div>
+<header id="topbar">
+  <div class="tb-brand"><span class="sb-dot"></span><b>每日任务推进</b><i id="dayChip">DAY · —</i></div>
+  <nav id="tabs"></nav>
+  <button id="nextday" title="生成明天的看板文件（单文件，勾选全新开始）">新一天 ⟶</button>
+</header>
+<aside id="side">
+  <nav class="side-nav" id="sideNav"></nav>
+  <div class="side-foot" id="sideFoot"></div>
+</aside>
+<aside id="sideR">
+  <div class="side-title">右栏 · 占位</div>
+  <p class="role" style="margin:6px 0 10px">这里放什么还没想好——先留壳。</p>
+  <div class="side-foot">按 → 键或右上角按钮开合</div>
+</aside>
+<div id="scrim"></div>
+<button id="burger" title="打开目录">&#9776;</button>
+<button id="burgerR" title="打开右栏">&#9776;</button>
+<div id="main"><div id="wrap"></div></div>
+</template>
+<div id="app"></div>
+<div id="wiz" class="ovl"></div>
+<script>
+const DATA = {
+  "meta": { "date": "2000-01-01", "dateCn": "种子模板", "prefix": "seed", "level": 2,
+    "source": "种子模板——点「新一天」扫当天日志，生成明天",
+    "templateNote": "深空风格产品说明模板 · 预设「每日任务推进」· style 公共层冻结" },
+  "hero": {
+    "kicker": "SEED · 每日任务推进 · 种子模板",
+    "title": "每日任务推进 · <em>种子</em>",
+    "sub": "这是一颗种子：生成器、样式、四级阶梯表全在里面，不承载任何一天的具体内容。<br>看板链条哪天断了（文件被删、换机器从零开始），双击本文件 → 点右上「新一天」→ 扫今天的日志，明天的看板就回来。<br>板块二、三是「复杂增量拆解」的占位样式板——以后拆增量，照着这两个板块填。",
+    "chips": [ { "t": "内嵌自复制生成器" }, { "t": "板块二/三 · 拆解样式板" }, { "t": "数据源 = 当天日志 md", "y": 1 } ],
+    "hint": "▾ 向下滚动 · 或点左侧目录 ▾" },
+  "levels": {
+    "1": { "name": "生存", "items": [
+      { "t": "睡眠锚", "rest": "：7:00 起 ＋ 21:50 闹钟就睡（保 9h，不论发生什么）＋ 熄灯后不碰手机", "org": 1 },
+      { "t": "早晨数据", "rest": "：体重 / 睡眠时长 / 清醒感受 / 资金", "org": 1 },
+      { "t": "洗漱", "rest": "：早晚各一次", "org": 1 },
+      { "t": "早饭", "rest": "：必吃（可买可做）", "org": 1 } ] },
+    "2": { "name": "生活", "items": [
+      { "t": "睡眠锚", "rest": "：7:00 起 ＋ 21:50 闹钟就睡（保 9h，不论发生什么）＋ 熄灯后不碰手机", "org": 1 },
+      { "t": "早晨数据", "rest": "：体重 / 睡眠时长 / 清醒感受 / 资金", "org": 1 },
+      { "t": "洗漱", "rest": "：早晚各一次", "org": 1 },
+      { "t": "早饭", "rest": "：必吃（可买可做）", "org": 1 },
+      { "t": "三餐自做", "rest": "：带饭盒（中午做、晚上公司微波）", "org": 2 },
+      { "t": "冥想 · 早", "rest": "（5-10 分钟，做了就算）", "org": 2 },
+      { "t": "冥想 · 回家", "rest": "（5-10 分钟）", "org": 2 },
+      { "t": "冥想 · 睡前", "rest": "（5-10 分钟）", "org": 2 } ] },
+    "3": { "name": "训练", "items": [
+      { "t": "睡眠锚", "rest": "：7:00 起 ＋ 21:50 闹钟就睡（保 9h，不论发生什么）＋ 熄灯后不碰手机", "org": 1 },
+      { "t": "早晨数据", "rest": "：体重 / 睡眠时长 / 清醒感受 / 资金", "org": 1 },
+      { "t": "洗漱", "rest": "：早晚各一次", "org": 1 },
+      { "t": "早饭", "rest": "：必吃（可买可做）", "org": 1 },
+      { "t": "三餐自做", "rest": "：带饭盒（中午做、晚上公司微波）", "org": 2 },
+      { "t": "冥想 · 早", "rest": "（5-10 分钟，做了就算）", "org": 2 },
+      { "t": "冥想 · 回家", "rest": "（5-10 分钟）", "org": 2 },
+      { "t": "冥想 · 睡前", "rest": "（5-10 分钟）", "org": 2 },
+      { "t": "训练动作 ×1", "rest": "：健身日完整健身（≈2h，认真感受）/ 身体需恢复时练琴顶替 / 琴日练琴", "org": 3 } ] },
+    "4": { "name": "满配", "items": [
+      { "t": "睡眠锚", "rest": "：7:00 起 ＋ 21:50 闹钟就睡（保 9h，不论发生什么）＋ 熄灯后不碰手机", "org": 1 },
+      { "t": "早晨数据", "rest": "：体重 / 睡眠时长 / 清醒感受 / 资金", "org": 1 },
+      { "t": "洗漱", "rest": "：早晚各一次", "org": 1 },
+      { "t": "早饭", "rest": "：必吃（可买可做）", "org": 1 },
+      { "t": "三餐自做", "rest": "：带饭盒（中午做、晚上公司微波）", "org": 2 },
+      { "t": "冥想 · 早", "rest": "（5-10 分钟，做了就算）", "org": 2 },
+      { "t": "冥想 · 回家", "rest": "（5-10 分钟）", "org": 2 },
+      { "t": "冥想 · 睡前", "rest": "（5-10 分钟）", "org": 2 },
+      { "t": "健身", "rest": "：全力按计划（重启期吃不消 2h，尽力即算）", "org": 4 },
+      { "t": "练琴", "rest": "：按前一天定的效率与时长", "org": 4 } ] } },
+  "fixed": { "title": "固定量（生成时按级别展开）", "sub": "点「新一天」后，看板扫描你日志里定的级数（明日状态：X级），自动带出对应级别的固定任务清单。", "note": "另有记录性打卡（健身打卡 / 练琴打卡）在日志「系统迭代」区——做完顺手记，热力图数据源。" },
+  "complexIntro": { "sub": "新文件从当天日志「明日任务」解析：方便做的归「快速增量」，要推进的归「复杂增量」——子任务拆解看部分四，样式照板块二、板块三。", "note": "板块二往后全是复杂增量：一条增量一个板块，两条就加板块三，以此类推；每个子任务按四要素展开（要完成什么 → 现状 → 目标 → 预估时间），子任务全勾，总览自动勾上。", "carryLine": "" },
+  "complex": [
+    { "no": 1, "name": "复杂增量占位一（样式板）", "short": "复杂增量样式板", "tabTag": "X1–X3",
+      "brief": "复杂增量拆解样式——一条增量一个板块，子任务按四要素写",
+      "listLabel": "<b>增量 1 · 名称占位</b>：一句话写清这条增量做什么——子任务在板块二展开，全勾后这里自动勾上",
+      "hero": { "kicker": "PANEL 2 · 复杂增量", "title": "复杂增量 · <em>拆解样式板</em>",
+        "sub": "板块二往后<em>全是复杂增量</em>——日志里一条增量就到板块二为止，两条就照样式再加板块三，以此类推；页签与左栏目录随板块自动生成，不用手挂。<br>每个子任务按<b>四要素</b>展开（要完成什么 → 现状 → 目标 → 预估时间）——子任务<b>全勾，总览「增量 1」自动勾上</b>，取消任意一条同步取消。",
+        "chips": [ { "t": "一条增量 · 一个板块" }, { "t": "子任务 · 四要素" }, { "t": "全勾 · 联动总览", "y": 1 } ],
+        "hint": "▾ 向下滚动 ▾" },
+      "tasks": [
+        { "code": "X1", "title": "X1 · 子任务名称占位", "sub": "一句话说明这个子任务做什么——显示在标题下与左栏目录。",
+          "check": "完成打勾——X1–X3 全勾，总览「增量 1」自动勾上",
+          "pts": [
+            { "c": "b", "h": "<b>要完成什么</b>：这个子任务的产出——写成「做完拿到手的是什么」；" },
+            { "c": "b", "h": "<b>现状</b>：手头上有什么资料、什么资源、已经做到哪；" },
+            { "c": "wip", "h": "<b>目标</b>：做到什么样算完成——要<em>可验收</em>，不写空话；" },
+            { "c": "todo", "h": "<b>预估时间</b>：大概多久、排在当天什么位置（宜先做 / 排在后 / 放最后）。" } ] },
+        { "code": "X2", "title": "X2 · 子任务名称占位", "sub": "第二个子任务——写法与 X1 完全一样，照抄换内容。",
+          "check": "完成打勾——X1–X3 全勾，总览「增量 1」自动勾上",
+          "pts": [
+            { "c": "b", "h": "<b>要完成什么</b>：产出占位；" },
+            { "c": "b", "h": "<b>现状</b>：资料与进展占位；" },
+            { "c": "wip", "h": "<b>目标</b>：可验收的完成判据占位；" },
+            { "c": "todo", "h": "<b>预估时间</b>：时长与位置占位。" } ] },
+        { "code": "X3", "title": "X3 · 子任务名称占位（条数随增量定）", "sub": "子任务条数不固定——两三条都行，拆到「一条一个勾」为止。",
+          "check": "完成打勾——X1–X3 全勾，总览「增量 1」自动勾上",
+          "pts": [
+            { "c": "b", "h": "<b>要完成什么</b>：产出占位；" },
+            { "c": "b", "h": "<b>现状</b>：资料与进展占位；" },
+            { "c": "wip", "h": "<b>目标</b>：可验收的完成判据占位；" },
+            { "c": "todo", "h": "<b>预估时间</b>：时长与位置占位。" } ] } ] },
+    { "no": 2, "name": "复杂增量占位二（样式板）", "short": "第二个增量 · 加板块", "tabTag": "Y1–Y2",
+      "brief": "第二条增量就再加一个板块——结构照抄板块二，换掉占位内容",
+      "listLabel": "<b>增量 2 · 名称占位</b>：第二条增量照此再加一个板块（板块三）——结构照抄板块二，换掉占位内容",
+      "hero": { "kicker": "PANEL 3 · 复杂增量", "title": "第二个增量 · <em>再加一个板块</em>",
+        "sub": "两条增量就再加一个板块三——结构与板块二<em>完全一样</em>：照抄一份、换掉占位即可；三条就加板块四，以此类推。",
+        "chips": [ { "t": "结构照抄板块二" }, { "t": "换占位即可", "y": 1 } ],
+        "hint": "▾ 向下滚动 ▾" },
+      "tasks": [
+        { "code": "Y1", "title": "Y1 · 子任务名称占位", "sub": "与板块二同款——四要素照抄换内容。",
+          "check": "完成打勾——Y1–Y2 全勾，总览「增量 2」自动勾上",
+          "pts": [
+            { "c": "b", "h": "<b>要完成什么</b>：产出占位；" },
+            { "c": "b", "h": "<b>现状</b>：资料与进展占位；" },
+            { "c": "wip", "h": "<b>目标</b>：可验收的完成判据占位；" },
+            { "c": "todo", "h": "<b>预估时间</b>：时长与位置占位。" } ] },
+        { "code": "Y2", "title": "Y2 · 子任务名称占位", "sub": "同上——子任务条数照实际需要定。",
+          "check": "完成打勾——Y1–Y2 全勾，总览「增量 2」自动勾上",
+          "pts": [
+            { "c": "b", "h": "<b>要完成什么</b>：产出占位；" },
+            { "c": "b", "h": "<b>现状</b>：资料与进展占位；" },
+            { "c": "wip", "h": "<b>目标</b>：可验收的完成判据占位；" },
+            { "c": "todo", "h": "<b>预估时间</b>：时长与位置占位。" } ] } ] } ],
+  "quick": [],
+  "improve": { "title": "预估进展与待改进", "sub": "生成的新文件里：预估是占位讨论底稿，改进来自当天日志「改进」区。", "forecast": "（种子模板无内容——点「新一天」开始）", "emphasis": "", "items": [] }
+};
+</script>
+<script id="appjs">
+"use strict";
+/* ═══════════ 工具 ═══════════ */
+function q(s,r){return (r||document).querySelector(s)}
+function qa(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))}
+const CN=['一','二','三','四','五','六','七','八'];
+function lvInfo(n){return DATA.levels[String(n)]}
+function pad2(n){return String(n).padStart(2,'0')}
+function todayStr(){const t=new Date();return t.getFullYear()+'-'+pad2(t.getMonth()+1)+'-'+pad2(t.getDate())}
+function nextDate(iso){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+1);
+  const s=d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+  return {iso:s,cn:(d.getMonth()+1)+'月'+d.getDate()+'日',prefix:'d'+pad2(d.getMonth()+1)+pad2(d.getDate())}}
+function stripTags(s){return s.replace(/<[^>]*>/g,'')}
+function withTimeout(p,ms){return Promise.race([Promise.resolve(p),new Promise(function(res){setTimeout(function(){res(null)},ms||3000)})])}
+/* ═══════════ 页面拼装（同一套函数：既渲染本页，也生成新文件） ═══════════ */
+function chk(id,label,parent){return '<label class="chk"><input type="checkbox" id="'+id+'"'+(parent?' data-parent="'+parent+'"':'')+'>'+label+'</label>'}
+function section(id,no,title,sub,inner){return '<section class="chapter" id="'+id+'"><div class="ch-no rv">'+no+'</div><h2 class="ch-title rv">'+title+'</h2><p class="ch-sub rv">'+sub+'</p>'+inner+'</section>'}
+function heroHtml(H){
+  return '<section id="hero"><div class="hero-kicker rv">'+H.kicker+'</div>'
+    +'<h1 class="hero-title rv d1">'+H.title+'</h1>'
+    +'<p class="hero-sub rv d2">'+H.sub+'</p>'
+    +'<div class="rv d3" style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
+    +H.chips.map(c=>'<span class="chip'+(c.y?' y':'')+'">'+c.t+'</span>').join('')+'</div>'
+    +'<div class="kbd-hint rv"><span><kbd>←</kbd>左目录 开/收</span><span><kbd>→</kbd>右栏 开/收</span><span><kbd>Esc</kbd>收起两侧</span></div>'
+    +'<div class="scroll-hint">'+(H.hint||'▾ 向下滚动 · 或点左侧目录 ▾')+'</div></section>';
+}
+function ptsHtml(pts){return '<ul class="pts">'+pts.map(p=>'<li class="'+p.c+'">'+p.h+'</li>').join('')+'</ul>'}
+function tabsHtml(){
+  let h='<button class="tab on" data-panel="p1">板块一 · 总览勾选</button>';
+  let pi=0;
+  DATA.complex.forEach(function(b){if(b.bare)return;h+='<button class="tab" data-panel="pb'+pi+'">板块'+CN[pi+1]+' · '+b.short+'</button>';pi++});
+  return h;
+}
+function sideHtml(){
+  const n=lvInfo(DATA.meta.level).items.length,k=DATA.complex.length;
+  let h='<div class="side-group" data-panel="p1">板块一 · 总览勾选</div>';
+  h+='<a class="side-link" href="#p1-a1" data-panel="p1">部分一 · 今日固定量（'+n+' 条）</a>';
+  h+='<a class="side-link" href="#p1-a2" data-panel="p1">部分二 · 增量（'+k+' 项）</a>';
+  let pi=0;
+  DATA.complex.forEach(function(b){if(b.bare)return;h+='<a class="side-sub" href="#pb'+pi+'-a0" data-panel="pb'+pi+'">'+b.name+' '+b.tabTag+'（板块'+CN[pi+1]+'）</a>';pi++});
+  h+='<a class="side-link" href="#p1-a3" data-panel="p1">预估进展与待改进</a>';
+  h+='<a class="side-link" href="#p1-a4" data-panel="p1">复杂增量 · 拆解（'+k+' 项）</a>';
+  pi=0;
+  DATA.complex.forEach(function(b){
+    if(b.bare)return;
+    h+='<div class="side-group" data-panel="pb'+pi+'">板块'+CN[pi+1]+' · '+b.short+'</div>';
+    b.tasks.forEach(function(t,j){h+='<a class="side-link" href="#pb'+pi+'-a'+j+'" data-panel="pb'+pi+'">'+t.title+'</a>'});
+    pi++;
+  });
+  return h;
+}
+function panelsHtml(){
+  let h='<section class="panel on" id="p1">'+heroHtml(DATA.hero);
+  const lv=lvInfo(DATA.meta.level);
+  h+=section('p1-a1','PART 1 · 部分一',DATA.fixed.title,DATA.fixed.sub,
+    '<div class="card rv board"><span class="tag">固定量清单 · 勾选推进</span>'
+    +lv.items.map((it,ix)=>chk(DATA.meta.prefix+'f'+(ix+1),'<b>'+it.t+'</b>'+it.rest)).join('')
+    +'</div><p class="role" style="margin-top:10px">'+DATA.fixed.note+((DATA.meta.prefix==='seed')?'<br><b>每个人的固定级数任务都不一样</b>——可以先借鉴我这一套，但要走自己的路：跟 AI 说一声，让它按你的情况改成你自己的四级阶梯。':'')+'</p>');
+  h+=section('p1-a2','PART 2 · 部分二','增量',DATA.complexIntro.sub,
+    '<div class="card rv board"><span class="tag">快速增量 · 顺手勾掉</span>'
+    +(DATA.quick.length?DATA.quick.map((s,ix)=>chk(DATA.meta.prefix+'q'+(ix+1),s)).join(''):'<p style="font-size:13.5px;color:var(--dim2);padding:6px 10px">今日无快速增量。</p>')
+    +'</div>'
+    +'<div class="card rv board" style="margin-top:12px"><span class="tag">复杂增量 · 勾选联动</span>'
+    +DATA.complex.map(b=>chk(DATA.meta.prefix+'z'+b.no,b.listLabel)).join('')
+    +(DATA.complex.length?'':'<p style="font-size:13.5px;color:var(--dim2);padding:6px 10px">今日无复杂增量。</p>')
+    +'</div><p class="role" style="margin-top:10px">'+DATA.complexIntro.note+(DATA.complexIntro.carryLine?' '+DATA.complexIntro.carryLine:'')+'</p>');
+  const imp=DATA.improve,piN=3;
+  const ul='<li class="b"><b>每日预估进展</b>：'+imp.forecast+'</li>'+(imp.emphasis?'<li class="todo"><b>待改进强调</b>：'+imp.emphasis+'</li>':'');
+  h+=section('p1-a3','PART '+piN+' · 部分'+CN[piN-1]+' · 总览末位',imp.title,imp.sub,
+    '<div class="card rv board"><span class="tag">收尾与改进</span><ul class="pts">'+ul+'</ul>'
+    +imp.items.map((s,ix)=>chk(DATA.meta.prefix+'a'+(ix+1),s)).join('')+'</div>');
+  let dk='<div class="card rv board"><span class="tag">复杂增量 · 拆解看板</span>';
+  if(DATA.complex.length){
+    dk+=DATA.complex.map(function(b){
+      const inner=(b.tasks&&b.tasks.length)
+        ?b.tasks.map((t,j)=>chk(DATA.meta.prefix+'z'+b.no+'x'+(j+1),'<b>· </b>'+t.check,DATA.meta.prefix+'z'+b.no)).join('')
+        :'<p style="font-size:13.5px;color:var(--dim2);padding:6px 10px">子任务待与 AI 拆解——把本文件丢给 AI，说「拆解增量 '+b.no+'」，拆好一块挂一块。</p>';
+      return '<div style="margin:12px 0 2px">'+b.listLabel+'</div>'+inner;
+    }).join('');
+  }else{
+    dk+='<p style="font-size:13.5px;color:var(--dim2);padding:6px 10px">今日无复杂增量。</p>';
+  }
+  dk+='</div><p class="role" style="margin-top:10px">复杂增量拆到最小可执行动作，做完逐项勾——子任务全勾，总览自动勾上。</p>';
+  h+=section('p1-a4','PART 4 · 部分四 · 总览末位','复杂增量 · 拆解','每个复杂增量的子任务都挂在这里，和各板块的勾选实时联动；待拆解的会标出来。',dk);
+  h+='</section>';
+  let pi=0;
+  DATA.complex.forEach(function(b){
+    if(b.bare)return;
+    h+='<section class="panel" id="pb'+pi+'">'+heroHtml(b.hero);
+    b.tasks.forEach(function(t,j){
+      h+=section('pb'+pi+'-a'+j,'SUBTASK '+t.code,t.title,t.sub,
+        '<div class="card rv board"><span class="tag">四要素 · 勾选联动总览</span>'
+        +chk(DATA.meta.prefix+'z'+b.no+'x'+(j+1),t.check,DATA.meta.prefix+'z'+b.no)
+        +ptsHtml(t.pts)+'</div>');
+    });
+    h+='</section>';pi++;
+  });
+  h+='<div class="foot rv">'+DATA.meta.dateCn+' · 每日任务推进 · '+DATA.meta.source+'<br>'+DATA.meta.templateNote+'</div>';
+  return h;
+}
+
+/* ═══════════ 自复制：滚日生成器 ═══════════ */
+/* ═══════════ 日志扫描（数据源=第二大脑日志 md）＋ 自复制生成器 ═══════════ */
+function parseLog(md){
+  const lines=md.split(/\r?\n/);
+  const fixedNames=[];
+  Object.keys(DATA.levels).forEach(k=>DATA.levels[k].items.forEach(it=>{if(fixedNames.indexOf(it.t)<0)fixedNames.push(it.t)}));
+  let sec=null,level=null;const incs=[],improves=[];
+  for(let i=0;i<lines.length;i++){
+    const L=lines[i];
+    if(/^###\s+明日任务/.test(L)){
+      sec='next';
+      const m=L.match(/明日状态：\s*([一二三四1-4])\s*级/);
+      if(m)level='一二三四'.indexOf(m[1])>=0?'一二三四'.indexOf(m[1])+1:parseInt(m[1],10);
+      continue;
+    }
+    if(/^###\s+改进/.test(L)){sec='imp';continue}
+    if(/^###\s/.test(L)&&sec)sec=null;
+    if(!sec)continue;
+    const t=L.match(/^-\s*\[[ xX]?\]\s*(.+)$/);
+    if(!t)continue;
+    let txt=t[1].replace(/\s*📅\s*\d{4}-\d{2}-\d{2}\s*$/,'').replace(/\*\*/g,'').trim();
+    if(!txt)continue;
+    if(sec==='imp'){improves.push(txt);continue}
+    if(fixedNames.some(f=>txt.indexOf(f)===0))continue;
+    const im=txt.match(/^增量\s*([0-9]+)\s*[：:]\s*(.+)$/);
+    if(im)incs.push({no:parseInt(im[1],10),text:im[2].trim()});
+    else incs.push({no:0,text:txt});
+  }
+  let mx=0;incs.forEach(x=>{if(x.no>mx)mx=x.no});
+  incs.forEach(x=>{if(!x.no)x.no=++mx});
+  return {level:level,incs:incs,improves:improves};
+}
+function buildDataFromLog(parsed,tIso,scanIso){
+  const dd=new Date(tIso+'T12:00:00');
+  const fcn=(dd.getMonth()+1)+'月'+dd.getDate()+'日';
+  const fprefix='d'+pad2(dd.getMonth()+1)+pad2(dd.getDate());
+  const sd=new Date(scanIso+'T12:00:00');
+  const scanCn=(sd.getMonth()+1)+'月'+sd.getDate()+'日';
+  const lv=lvInfo(parsed.level);
+  const all=parsed.incs.map(function(inc){
+    return {no:inc.no,name:stripTags(inc.text),short:stripTags(inc.text),tabTag:'',brief:'',bare:true,tasks:[],
+      listLabel:'<b>增量 '+inc.no+' · '+stripTags(inc.text)+'</b>（子任务待与 AI 拆解）'};
+  });
+  const im=parsed.improves.map(function(s,ix){return '改进 '+(ix+1)+' · '+s});
+  return {
+    meta:{date:tIso,dateCn:fcn,prefix:fprefix,level:parsed.level,
+      generatedAt:new Date().toISOString(),
+      source:'任务来源：日志/日复盘/'+scanIso+'.md（'+scanCn+'日志「明日任务」）',
+      templateNote:DATA.meta.templateNote},
+    hero:{kicker:'TODAY · '+tIso+' · 每日任务推进',title:fcn+' · 任务<em>推进</em>',
+      sub:'今日状态：<b>'+CN[parsed.level-1]+'级 · '+lv.name+'</b>——固定量 '+lv.items.length+' 条打底；<br>'
+        +(all.length?all.length+' 项增量：'+all.map(function(b){return stripTags(b.name)}).join(' / ')+'（子任务待拆解）':'今日无增量。')
+        +'子任务全勾，总览自动勾上。',
+      chips:[{t:'固定量 · '+lv.items.length+' 条（'+CN[parsed.level-1]+'级 · '+lv.name+'）'},{t:'增量 · '+all.length+' 项'}]
+        .concat([{t:'改进项 · '+im.length+' 条（并入末位）',y:1}]),
+      hint:'▾ 向下滚动 · 或点左侧目录 ▾'},
+    fixed:{title:'今日固定量 · '+CN[parsed.level-1]+'级 · '+lv.name,sub:'每日例行——「'+lv.name+'」状态，固定量照常打底。',note:DATA.fixed.note},
+    complexIntro:{sub:'需要推进的增量，共 '+all.length+' 项——子任务待与 AI 拆解，拆好一块挂一块。',
+      note:'',
+      carryLine:''},
+    complex:all,
+    levels:DATA.levels,
+    quick:[],
+    improve:{title:'今日预估进展与待改进',sub:'当天收尾时看一眼——改进项也放这里（今日 '+im.length+' 条），提醒监督自己这些地方要改。',
+      forecast:'（由你按当天节奏在此更新）',emphasis:'',items:im}
+  };
+}
+function idbOpen(){return new Promise(function(res,rej){
+  const r=indexedDB.open('kanban-fs',1);
+  r.onupgradeneeded=function(){r.result.createObjectStore('h')};
+  r.onsuccess=function(){res(r.result)};r.onerror=function(){rej(r.error)};
+})}
+function idbGet(k){return idbOpen().then(db=>new Promise(function(res,rej){
+  const rq=db.transaction('h','readonly').objectStore('h').get(k);
+  rq.onsuccess=function(){res(rq.result)};rq.onerror=function(){rej(rq.error)}}))}
+function idbSet(k,v){return idbOpen().then(db=>new Promise(function(res,rej){
+  const rq=db.transaction('h','readwrite').objectStore('h').put(v,k);
+  rq.onsuccess=function(){res(1)};rq.onerror=function(){rej(rq.error)}}))}
+/* ═══════════ 一键滚日：扫今天日志 → 生成明天（读取四级降级，命名在保存框里改） ═══════════ */
+async function rolloverNow(){
+  const base=todayStr()>DATA.meta.date?todayStr():DATA.meta.date;
+  let md=null;
+  let broken=false;
+  try{broken=localStorage.getItem('dirpicker_broken')==='1'}catch(e){}
+  // A) 曾授权过的文件夹句柄：能读就静默读（读不到自动落文件选择）
+  try{
+    const h=await idbGet('logdir');
+    if(h){
+      let p=await withTimeout(h.queryPermission({mode:'read'}),8000);
+      if(p!=='granted')p=await withTimeout(h.requestPermission({mode:'read'}),60000);
+      if(p==='granted'){
+        const fh=await withTimeout(h.getFileHandle(base+'.md'),10000);
+        if(fh)md=await (await fh.getFile()).text();
+      }
+    }
+  }catch(e){}
+  // A2) 没记住授权（首次使用/浏览器清过数据）→ 弹一次文件夹选择：授权一次终身静默；环境不支持则记住并降级单文件
+  if(md===null&&!broken&&window.showDirectoryPicker){
+    let d=null;
+    try{
+      d=await withTimeout(window.showDirectoryPicker({id:'kanban-logdir',mode:'read'}),300000);
+      try{idbSet('logdir',d)}catch(e){}
+    }catch(err){
+      if(err&&err.name==='AbortError')return;
+      try{localStorage.setItem('dirpicker_broken','1')}catch(e){}
+      broken=true;
+      toast('此浏览器的文件夹授权不可用——已记住，改走单文件选择',8000);
+    }
+    if(d){
+      let f2=null;
+      try{f2=await withTimeout(d.getFileHandle(base+'.md'),10000)}catch(e){f2=null}
+      if(f2){
+        try{md=await (await f2.getFile()).text()}catch(e){md=null}
+      }
+      if(md===null){toast('选到的「'+(d.name||'')+'」里没有 '+base+'.md——可能选到了同名副本（坚果云/通用版）；已改弹文件选择，直接选今天的日志即可',9000);}
+    }
+  }
+  if(md!==null){finishRoll(md,base);return}
+  // B) 选今天那个 md 文件（文件名必须对上，防选到别的日期/副本）
+  if(!window.showOpenFilePicker){toast('此浏览器不支持选文件——用系统 Edge 打开本文件再点一次「新一天」',8000);return}
+  let oh=null;
+  try{oh=await withTimeout(window.showOpenFilePicker({types:[{description:'今日日志 markdown',accept:{'text/markdown':['.md'],'text/plain':['.md']}}]}),300000)}
+  catch(err){if(!(err&&err.name==='AbortError'))toast('选文件被拦：'+((err&&err.message)||err),8000);return}
+  if(!oh)return;
+  if(oh[0].name!==base+'.md'){toast('选的是 '+oh[0].name+'——今天需要的是 '+base+'.md，重新点一次再选',8000);return}
+  toast('已选中日志，读取内容中…',2000);
+  let f=null;
+  try{f=await withTimeout(oh[0].getFile(),10000)}catch(e){f=null}
+  if(!f){toast('卡死定位：getFile 3 秒无响应——此环境读文件内容功能不可用（外部生成方案可恢复，联系 AI）',9000);return}
+  let logText=null;
+  try{logText=await new Promise(function(res){
+    const r=new FileReader();
+    r.onload=function(){res(String(r.result))};
+    r.onerror=function(){res(null)};
+    r.readAsText(f);
+    setTimeout(function(){res(null)},8000);
+  })}catch(e){logText=null}
+  if(logText===null){
+    try{logText=await withTimeout(f.text(),8000)}catch(e){logText=null}
+  }
+  if(logText===null){toast('卡死定位：FileReader 与 text 都无响应——此环境读文件内容功能不可用（外部生成方案可恢复，联系 AI）',9000);return}
+  finishRoll(logText,base);
+}
+
+function buildFile(nd){
+  const tplSrc='<template id="shells">'+document.getElementById('shells').innerHTML+'</template>';
+  const css=document.querySelector('style').textContent;
+  const app=document.getElementById('appjs').textContent;
+  const data='const DATA = '+JSON.stringify(nd,null,2).replace(/<\//g,'<\\/')+';';
+  return '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n<meta charset="UTF-8">\n'
+    +'<meta name="viewport" content="width=device-width, initial-scale=1.0">\n'
+    +'<title>'+nd.meta.dateCn+' · 每日任务推进</title>\n'
+    +'<!--\n  '+nd.meta.dateCn+' · 每日任务推进 · '+nd.meta.date+' · 向导版（数据块 + 每日仪式 + 一键滚日）\n'
+    +'  由种子模板/前一日看板生成；内容全在数据块 DATA 段，日常无需手改。-->\n'
+    +'<style>\n'+css+'\n</style>\n</head>\n<body>\n'+tplSrc+'\n<div id="app"></div>\n'
+    +'<div id="wiz" class="ovl"></div>\n'
+    +'<script>\n'+data+'\n<\/script>\n<script id="appjs">\n'+app+'\n<\/script>\n</body>\n</html>';
+}
+
+function finishRoll(md,base){
+  const parsed=parseLog(md);
+  if(!parsed.level){toast('日志「明日任务」标题里没有「明日状态：X级」——先补定级再滚日',8000);return}
+  const t=nextDate(base);
+  const nd=buildDataFromLog(parsed,t.iso,base);
+  saveNew(buildFile(nd),nd.meta.dateCn+'_每日任务推进.html');
+}
+async function saveNew(html,name){
+  let saved=false;
+  try{
+    if(window.showSaveFilePicker){
+      const handle=await window.showSaveFilePicker({suggestedName:name,types:[{description:'HTML 看板',accept:{'text/html':['.html']}}]});
+      const w=await handle.createWritable();await w.write(new Blob([html],{type:'text/html;charset=utf-8'}));await w.close();
+      saved=true;toast('已保存 '+name+'——明天打开它，首次进定级仪式');
+    }
+  }catch(err){if(err&&err.name==='AbortError')return}
+  if(!saved){
+    try{
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));a.download=name;
+      document.body.appendChild(a);a.click();a.remove();
+      toast('已开始下载 '+name+'——在「下载」文件夹里');
+    }catch(e){toast('生成失败：'+e.message)}
+  }
+}
+
+/* ═══════════ 每日仪式向导 ═══════════ */
+let selLevel=null,wizStep=1;
+function ritualStamp(){return (DATA.meta.generatedAt||DATA.meta.prefix+'_'+DATA.meta.date)+'_'+todayStr()}
+function wizardStep(n){
+  const M=DATA.meta,cur=selLevel||M.level;
+  let h='<div class="wiz-kicker">RITUAL · 每日仪式 · '+n+' / 4</div>';
+  if(n===1){
+    h+='<div class="wiz-title">'+M.dateCn+' · 状态定级</div>'
+      +'<p class="wiz-sub">昨夜定级仪式已选「'+lvInfo(M.level).name+'」——四卡在列，直接确定；要改就点卡片，固定量跟着换。</p>';
+    h+='<div class="wiz-cards">'+[1,2,3,4].map(function(k){
+      const L=lvInfo(k);
+      return '<div class="lv-card'+(cur===k?' sel':'')+(M.level===k?' badge':'')+'" data-lv="'+k+'">'
+        +'<span class="lv-badge">昨夜已定</span>'
+        +'<div><span class="lv-name">'+CN[k-1]+'级 · '+L.name+'</span><span class="lv-count">'+L.items.length+' 项</span></div>'
+        +'<ul>'+L.items.map(it=>'<li class="o'+it.org+'">'+it.t+it.rest+'</li>').join('')+'</ul></div>';
+    }).join('')+'</div>';
+  }else if(n===2){
+    h+='<div class="wiz-title">今日改进 · '+DATA.improve.items.length+' 条</div>'
+      +'<p class="wiz-sub">昨天扫出、今天要还的账——放在眼前过一遍再开工。</p>';
+    h+='<div class="wiz-list">'+(DATA.improve.items.length?DATA.improve.items.map(s=>'<div class="witem">'+s+'</div>').join(''):'<div class="witem">今日无改进项。</div>')+'</div>';
+  }else if(n===3){
+    h+='<div class="wiz-title">快速增量</div><p class="wiz-sub">一句话能做完的小事——扫一眼就过。</p>';
+    h+='<div class="wiz-list">'+(DATA.quick.length?DATA.quick.map(s=>'<div class="witem">'+s+'</div>').join(''):'<div class="witem">今日无快速增量。</div>')+'</div>';
+  }else{
+    h+='<div class="wiz-title">增量 · 子任务在列</div><p class="wiz-sub">今天日志排定的任务——每条的子任务扫一遍，心里有数再进看板。</p>';
+    h+='<div class="wiz-list">'+(DATA.complex.length?DATA.complex.map(b=>'<div class="witem">'+b.listLabel
+      +(b.tasks.length?'<span class="wsub">子任务：</span>'+b.tasks.map(t=>'<span class="wsub">· '+t.title+'</span>').join(''):(b.bare?'<span class="wsub">子任务：待与 AI 拆解</span>':''))+'</div>').join(''):'<div class="witem">今日无增量。</div>')+'</div>';
+  }
+  h+='<div class="wiz-foot"><button class="btn" id="wizNext">'+(n<4?'确定，下一步':'完成仪式 · 进入看板')+'</button></div>';
+  h+='<div class="wiz-dots">'+[1,2,3,4].map(i=>'<i class="'+(i<=n?'on':'')+'"></i>').join('')+'</div>';
+  return h;
+}
+function renderWiz(){
+  q('#wiz').innerHTML='<div class="wiz-wrap">'+wizardStep(wizStep)+'</div>';
+  q('#wiz').classList.add('on');document.body.style.overflow='hidden';
+  q('#wizNext').addEventListener('click',function(){
+    if(wizStep===1){if(selLevel!==DATA.meta.level){DATA.meta.level=selLevel;renderAll();openPanel('p1')}openWizard(2)}
+    else if(wizStep===2)openWizard(3);
+    else if(wizStep===3)openWizard(4);
+    else finishWiz();
+  });
+  qa('#wiz .lv-card').forEach(c=>c.addEventListener('click',function(){selLevel=parseInt(c.dataset.lv,10);renderWiz()}));
+}
+function openWizard(n){wizStep=n;renderWiz()}
+function finishWiz(){
+  q('#wiz').classList.remove('on');document.body.style.overflow='';
+  try{localStorage.setItem('ritual_seen',ritualStamp())}catch(e){}
+  toast('今日仪式完成——开工。');
+}
+function maybeWizard(){
+  const p=new URLSearchParams(location.search);
+  if(p.has('nowiz'))return;
+  if(DATA.meta.date<todayStr())return;
+  selLevel=DATA.meta.level;
+  const forced=p.has('wiz');
+  let done=false;
+  try{done=!forced&&localStorage.getItem('ritual_seen')===ritualStamp()}catch(e){done=true}
+  if(done)return;
+  const w=parseInt(p.get('wiz')||'1',10);
+  openWizard(Math.min(Math.max(w,1),4));
+}
+
+/* ═══════════ 页面渲染与交互 ═══════════ */
+let tabs=[],panels=[],links=[],curPid='p1',MQ=null;
+function setSide(c){const b=q('#burger');if(!b)return;document.body.classList.toggle('side-closed',c);b.innerHTML=c?'&#9776;':'&#9664;';b.title=c?'打开目录':'收起目录'}
+function setRight(c){const b=q('#burgerR');if(!b)return;document.body.classList.toggle('right-closed',c);b.innerHTML=c?'&#9776;':'&#9654;';b.title=c?'打开右栏':'收起右栏'}
+function applyDefault(){if(MQ)setSide(MQ.matches)}
+function elTop(el){return el.getBoundingClientRect().top+scrollY}
+function scrollToEl(el){scrollTo({top:elTop(el)-70,behavior:'smooth'})}
+function openPanel(pid,anchor){
+  curPid=pid;
+  panels.forEach(p=>p.classList.toggle('on',p.id===pid));
+  tabs.forEach(t=>t.classList.toggle('on',t.dataset.panel===pid));
+  qa('#side [data-panel]').forEach(el=>{el.style.display=(el.dataset.panel===pid)?'':'none'});
+  if(anchor){const el=document.getElementById(anchor);if(el)setTimeout(function(){scrollToEl(el)},30)}
+  else scrollTo({top:0,behavior:'auto'});
+  history.replaceState(null,'','#'+pid);spy();
+}
+function spy(){
+  const cp=panels.find(function(p){return p.classList.contains('on')});if(!cp)return;
+  const cands=[];
+  links.forEach(a=>{const el=document.querySelector(a.getAttribute('href'));if(el&&cp.contains(el))cands.push({a:a,el:el})});
+  if(!cands.length)return;
+  const y=scrollY+95;let cur=cands[0];
+  cands.forEach(o=>{if(elTop(o.el)<=y)cur=o});
+  if(scrollY+innerHeight>=document.documentElement.scrollHeight-40)cur=cands[cands.length-1];
+  links.forEach(a=>a.classList.toggle('on',a===cur.a));
+}
+function toast(msg,ms){
+  let t=q('#toast');
+  if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t)}
+  t.textContent=msg;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},ms||4200);
+}
+function initPanelFX(){
+  const io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+  qa('.rv').forEach(el=>io.observe(el));
+  tabs=qa('#tabs .tab');panels=qa('.panel');links=qa('.side-link,.side-sub');
+  tabs.forEach(t=>t.addEventListener('click',function(){openPanel(t.dataset.panel)}));
+  links.forEach(a=>a.addEventListener('click',function(e){
+    e.preventDefault();
+    const id=a.getAttribute('href').slice(1),el=document.getElementById(id);if(!el)return;
+    const pn=el.closest('.panel'),pid=pn?pn.id:'p1';
+    if(pid!==curPid)openPanel(pid,id);else scrollToEl(el);
+    if(MQ&&MQ.matches)setSide(true);
+  }));
+  const scrim=q('#scrim'),burger=q('#burger'),burgerR=q('#burgerR');
+  if(burger)burger.addEventListener('click',function(){setSide(!document.body.classList.contains('side-closed'))});
+  if(burgerR)burgerR.addEventListener('click',function(){setRight(!document.body.classList.contains('right-closed'))});
+  if(scrim)scrim.addEventListener('click',function(){setSide(true);setRight(true)});
+  qa('.chk input[type=checkbox]').forEach(function(c){
+    if(!c.id)return;const k='chk_'+c.id;
+    try{if(localStorage.getItem(k)==='1')c.checked=true}catch(e){}
+    c.addEventListener('change',function(){try{localStorage.setItem(k,c.checked?'1':'0')}catch(e){}
+      qa('input[id="'+c.id+'"]').forEach(function(x){if(x!==c)x.checked=c.checked});});
+  });
+  qa('input[data-parent]').forEach(function(c){
+    c.addEventListener('change',function(){
+      const pid=c.getAttribute('data-parent'),p=document.getElementById(pid);if(!p)return;
+      const sibs=qa('input[data-parent="'+pid+'"]');let all=true;
+      sibs.forEach(x=>{if(!x.checked)all=false});
+      if(all&&!p.checked){p.checked=true;try{localStorage.setItem('chk_'+pid,'1')}catch(e){}toast('子任务全勾——总览对应项已自动勾上')}
+      else if(!all&&p.checked){p.checked=false;try{localStorage.setItem('chk_'+pid,'0')}catch(e){}toast('有子任务取消——总览对应项已同步取消')}
+    });
+  });
+  const nd=q('#nextday');if(nd)nd.addEventListener('click',rolloverNow);
+}
+function renderAll(){
+  q('#app').innerHTML=document.getElementById('shells').innerHTML;
+  q('#tabs').innerHTML=tabsHtml();
+  q('#sideNav').innerHTML=sideHtml();
+  q('#sideFoot').innerHTML=DATA.meta.source+'<br>← 目录 · → 右栏 · Esc 收';
+  q('#dayChip').textContent='DAY · '+DATA.meta.date;
+  q('#wrap').innerHTML=panelsHtml();
+  document.body.classList.add('right-closed');applyDefault();
+  initPanelFX();
+  (function(){const h=location.hash.replace('#','');const p=h?document.getElementById(h):null;
+    if(p&&p.classList.contains('panel'))openPanel(p.id,p.id!==h?h:null);else openPanel(curPid||'p1')})();
+}
+function boot(){
+  MQ=matchMedia('(max-width:960px)');
+  if(MQ.addEventListener)MQ.addEventListener('change',applyDefault);else MQ.addListener(applyDefault);
+  document.body.classList.add('right-closed');applyDefault();
+  addEventListener('scroll',function(){const h=document.documentElement,p=q('#prog');
+    if(p&&h.scrollHeight>h.clientHeight)p.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100).toFixed(2)+'%'},{passive:true});
+  addEventListener('scroll',spy,{passive:true});addEventListener('resize',spy);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft'){e.preventDefault();setSide(!document.body.classList.contains('side-closed'))}
+    else if(e.key==='ArrowRight'){e.preventDefault();setRight(!document.body.classList.contains('right-closed'))}
+    else if(e.key==='Escape'&&!q('#wiz.on')){setSide(true);setRight(true)}
+  });
+  renderAll();
+  maybeWizard();
+}
+if(typeof document!=='undefined'&&document.getElementById('appjs'))boot();
+</script>
+</body>
+</html>

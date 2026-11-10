@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深空风格 · 板块导航模板</title>
+<!-- ═════════════════════════════════════════════════════════════════════
+  深空风格 · 板块导航模板（顶部板块 + 左栏双层目录 + 两个现成预设）· 2026-10-12
+  布局模仿 api-docs.deepseek.com：顶部横向板块页签 + 左侧当前板块的目录 +
+  右侧内容面板。点板块/部分/小节，右侧瞬时切换（本地单文件，无刷新）。
+  层级固定三层：板块（顶部页签）→ 部分（左栏主条目）→ 小节（左栏缩进子条目，
+  最多嵌套这一层）。本地使用，无需上线。
+
+  固定 vs 可变的分账——本模板沉淀的是骨架与样式，不是某一篇具体内容：
+  固定不动：色调 UI、顶部板块流转、左栏双层目录、右栏壳、快捷键（← / → / Esc）、
+            层级结构与各级标题样式、状态标记（▸ 普通 ✓ 完成 △ 进行中 ◇ 待办）。
+  每次要填：板块名、部分名、小节名、全部正文——页面上写「占位 / 由项目填」处都是改处。
+
+  三个板块的分工（预设只是起跑线，套用时三个板块整体换成你自己的内容）：
+    板块一 · 模板说明        所有部件的样式与用法说明（常看常查，不随项目改）；
+    板块二 · 预设：产品说明  做产品说明时套用：总览 → 产品大致结构 → 说明的板块地图
+            → 各功能板块详解（每个功能板块固定三讲：定位 → 结构 → 使用与 DIY）；
+    板块三 · 预设：项目推进  独立想法、长期项目、梳理思路时套用：板块一总览勾选
+            （每部分一个任务+子任务清单）+ 执行顺序与要点（预估推进节奏、干法要点），
+            每个任务再拆一个详情板块（子任务四要素：要完成什么 → 现状 → 目标 → 预估时间）；
+
+  复用方法（每加一个部分三处同步，id 对上后切换/跳转/高亮全自动，JS 不改）：
+    第一步 顶部 <nav id="tabs"> 加一个页签（板块只在这里加）；
+    第二步 主区加一个面板 <section class="panel" id="pN">，面板内每部分是
+           <section class="chapter" id="pN-aM">，部分内小节标题锚 id="pN-aM-sK"；
+    第三步 左栏 <nav class="side-nav"> 加对应条目（都标 data-panel="pN"）：
+           部分 = <a class="side-link" href="#pN-aM">，小节 = <a class="side-sub" href="#pN-aM-sK">，
+           分组标题 = <div class="side-group" data-panel="pN">。
+
+  组件速查（<style> 为冻结公共层，复用时不要改）：
+    ── 骨架 ──
+    header#topbar > #tabs      顶部板块页签（.tab.on 青色下划线＝当前板块）
+    aside#side                 左侧栏：.side-group 分组标题（按板块显隐）/
+                               .side-link 部分条目 / .side-sub 小节条目（缩进一层，
+                               当前位置自动 .on 青色高亮）
+    .panel(.on)                一个板块的内容面板（.on 才显示；切换瞬时完成）
+    section#hero               板块内首屏横幅；section.chapter 一个部分（.ch-no/.ch-title/.ch-sub）
+    左上角 #burger             任何窗口尺寸随时收起/展开左栏（body.side-closed＝收起态，
+                               宽屏收起主区占满；窄屏 <960px 默认收起为抽屉，Esc/遮罩也可收）
+    右上角 #burgerR + #sideR   右侧栏占位（内容未定）：默认收起，body.right-closed＝收起态，用法与左栏镜像
+    快捷键                     ← 左目录开/收 · → 右栏开/收 · Esc 收两侧
+    ── 卡片与内容件 ──
+    .card                      深空卡片（四角青色角标）：.tag 主题标签 / .role 说明条 /
+                               ul.pts > li（li.b ▸青 / li.ok ✓绿 / li.todo ◇琥珀 / li.wip △紫）
+    label.chk > input[type=checkbox]        勾选条目（子任务清单用；点选打勾，存 localStorage 纯本地）
+    .flowline > .fl-node(.y) + .fl-arrow   横向流程节点，箭头 →
+    .dataflow                  等宽字体数据流/目录树块（源码换行原样渲染）
+                               span.k 青 / span.a 琥珀 / span.g 绿 / span.d 琥珀加粗行尾备注
+    .whygrid > .why            两列网格卡片（.wn 序号块 / h5 小标题 / p 说明）
+    h4.part（✓）/ h4.part.todo（◇）  部分内小节横幅；.chip(.y) hero 小标签；
+                               em 行内青色强调；b/strong 琥珀加粗；.foot 页脚；.kbd-hint 快捷键行
+  全局机制：.rv 入场渐显；#prog 顶部进度条；滚动时左栏自动高亮当前部分/小节。
+═════════════════════════════════════════════════════════════════════ -->
+<style>
+:root{
+  --bg0:#04070e; --cyan:#3ee6ff; --amber:#ffc94d; --green:#41ffa3; --red:#ff5a76; --violet:#b78cff;
+  --ink:#e9f3ff; --dim:#8aa3c4; --dim2:#5f7699;
+  --line:rgba(62,230,255,.25); --line2:rgba(62,230,255,.55);
+  --font:"Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+  --sidew:264px; --rwidth:240px; --toph:52px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);color:var(--ink);font-size:16px;line-height:1.78;
+  background:
+    radial-gradient(900px 520px at 85% -8%, rgba(62,230,255,.13), transparent 60%),
+    radial-gradient(800px 520px at -10% 30%, rgba(183,140,255,.10), transparent 60%),
+    linear-gradient(160deg,#04070e 0%,#071120 55%,#050a14 100%);
+  background-attachment:fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+  background-image:linear-gradient(rgba(62,230,255,.05) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(62,230,255,.05) 1px,transparent 1px);
+  background-size:42px 42px;
+  -webkit-mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%);
+          mask-image:radial-gradient(78% 66% at 50% 34%,#000 28%,transparent 100%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:9;opacity:.13;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.5) 0 2px,transparent 2px 4px)}
+b,strong{font-weight:900;color:var(--amber)}
+
+/* ============ 顶部板块页签栏（模仿 DeepSeek 文档站顶部导航） ============ */
+#topbar{position:fixed;left:0;right:0;top:0;height:var(--toph);z-index:90;display:flex;align-items:center;gap:16px;
+  padding:0 18px;background:rgba(4,10,20,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line)}
+.tb-brand{display:flex;align-items:center;gap:9px;font-size:14.5px;color:#fff;font-weight:900;letter-spacing:1px;white-space:nowrap}
+.sb-dot{flex:none;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px var(--cyan)}
+.tb-brand i{font-style:normal;font-size:11px;color:var(--dim2);font-weight:400;margin-left:2px}
+#tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;height:100%}
+#tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;color:var(--dim);font:900 13.5px/1 var(--font);letter-spacing:1px;
+  padding:0 13px;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:.15s;height:100%}
+.tab:hover{color:#d7f2ff}
+.tab.on{color:var(--cyan);border-bottom-color:var(--cyan);text-shadow:0 0 12px rgba(62,230,255,.5)}
+@media(max-width:640px){.tb-brand i{display:none}.tb-brand b{font-size:13px}}
+
+/* ============ 左侧目录栏（当前板块的部分 + 小节，最多嵌套一层） ============ */
+#side{position:fixed;left:0;top:var(--toph);bottom:0;width:var(--sidew);z-index:60;overflow-y:auto;overscroll-behavior:contain;
+  background:linear-gradient(180deg,rgba(8,16,30,.97),rgba(4,9,18,.98));
+  border-right:1px solid var(--line);padding:16px 14px 26px;display:flex;flex-direction:column;
+  box-shadow:6px 0 30px rgba(0,0,0,.35);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#side::-webkit-scrollbar{width:5px}
+#side::-webkit-scrollbar-thumb{background:rgba(62,230,255,.16);border-radius:3px}
+.side-group{font-size:10.5px;letter-spacing:3px;color:var(--dim2);margin:16px 8px 6px}
+.side-link{display:block;padding:8px 12px;margin:2px 0;border-radius:9px;font-size:13.5px;color:var(--dim);
+  text-decoration:none;border-left:2px solid transparent;transition:.15s;line-height:1.5}
+.side-link:hover{color:#d7f2ff;background:rgba(62,230,255,.06)}
+.side-link.on{color:var(--cyan);background:rgba(62,230,255,.08);border-left-color:var(--cyan);text-shadow:0 0 10px rgba(62,230,255,.45)}
+.side-sub{display:block;margin:1px 0 1px 22px;padding:5px 10px;border-radius:8px;font-size:12.5px;color:var(--dim2);
+  text-decoration:none;border-left:2px solid rgba(62,230,255,.14);transition:.15s;line-height:1.5}
+.side-sub:hover{color:#bfeeff;background:rgba(62,230,255,.05)}
+.side-sub.on{color:#8ff0ff;background:rgba(62,230,255,.07);border-left-color:var(--cyan)}
+.side-foot{margin-top:auto;padding:14px 8px 0;font-size:10.5px;color:var(--dim2);letter-spacing:1px;border-top:1px dashed var(--line)}
+
+/* ============ 主内容区 ============ */
+#main{margin-left:var(--sidew);margin-right:var(--rwidth);margin-top:var(--toph);position:relative;z-index:1;
+  transition:margin-left .28s cubic-bezier(.4,0,.2,1),margin-right .28s cubic-bezier(.4,0,.2,1)}
+#wrap{max-width:920px;margin:0 auto;padding:0 26px 90px}
+#prog{position:fixed;left:0;top:0;height:3px;width:0;z-index:99;background:linear-gradient(90deg,var(--cyan),var(--amber));box-shadow:0 0 12px rgba(62,230,255,.8)}
+
+/* ============ 侧栏开合：任何窗口尺寸都能用左上角按钮收起/展开（body.side-closed＝收起态） ============ */
+#burger{position:fixed;left:calc(var(--sidew) + 14px);top:calc(var(--toph) + 12px);z-index:80;width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(4,10,20,.92);color:var(--cyan);font-size:15px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);
+  transition:left .28s cubic-bezier(.4,0,.2,1)}
+#burger:hover{border-color:var(--line2);box-shadow:0 0 14px rgba(62,230,255,.2)}
+body.side-closed #burger{left:14px}
+#scrim{position:fixed;inset:0;background:rgba(2,5,10,.62);z-index:55;opacity:0;pointer-events:none;transition:opacity .25s}
+body.side-closed #side{transform:translateX(-103%);box-shadow:none}
+body.side-closed #main{margin-left:0}
+
+/* ============ 右侧栏（占位）：与左栏镜像，默认收起（body.right-closed） ============ */
+#sideR{position:fixed;right:0;top:var(--toph);bottom:0;width:var(--rwidth);z-index:60;overflow-y:auto;
+  background:linear-gradient(180deg,rgba(8,16,30,.97),rgba(4,9,18,.98));
+  border-left:1px solid var(--line);padding:16px 14px 26px;display:flex;flex-direction:column;
+  box-shadow:-6px 0 30px rgba(0,0,0,.35);transition:transform .28s cubic-bezier(.4,0,.2,1)}
+#sideR::-webkit-scrollbar{width:5px}
+#sideR::-webkit-scrollbar-thumb{background:rgba(62,230,255,.16);border-radius:3px}
+#sideR .side-title{font-size:12px;letter-spacing:2px;color:var(--cyan);font-weight:900;margin:4px 8px 10px}
+body.right-closed #sideR{transform:translateX(103%);box-shadow:none}
+body.right-closed #main{margin-right:0}
+#burgerR{position:fixed;right:calc(var(--rwidth) + 14px);top:calc(var(--toph) + 12px);z-index:80;width:40px;height:40px;border-radius:10px;
+  border:1px solid var(--line);background:rgba(4,10,20,.92);color:var(--cyan);font-size:15px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(8px);
+  transition:right .28s cubic-bezier(.4,0,.2,1)}
+#burgerR:hover{border-color:var(--line2);box-shadow:0 0 14px rgba(62,230,255,.2)}
+body.right-closed #burgerR{right:14px}
+@media(max-width:960px){
+  #main{margin-left:0;margin-right:0}
+  #side{width:280px}
+  #sideR{width:270px}
+  body:not(.side-closed) #scrim,body:not(.right-closed) #scrim{opacity:1;pointer-events:auto}
+}
+
+/* ============ 板块面板：.on 才显示，切换瞬时完成 ============ */
+.panel{display:none}
+.panel.on{display:block}
+
+/* ============ 入场动画 ============ */
+.rv{opacity:0;transform:translateY(36px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}
+
+/* ============ 板块内首屏与部分 ============ */
+#hero{min-height:58vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:56px 0 30px}
+.hero-kicker{font-size:13px;letter-spacing:8px;color:var(--dim)}
+.hero-title{font-size:42px;font-weight:900;letter-spacing:4px;color:#fff;text-shadow:0 0 26px rgba(62,230,255,.7);margin:14px 0 8px}
+.hero-title em{font-style:normal;color:var(--cyan)}
+.hero-sub{font-size:16px;color:var(--dim);max-width:720px}
+.scroll-hint{margin-top:36px;font-size:12px;letter-spacing:4px;color:var(--dim2);animation:blink 1.6s steps(2) infinite}
+.kbd-hint{margin-top:20px;font-size:11px;color:var(--dim2);letter-spacing:1px;display:flex;gap:16px;flex-wrap:wrap;justify-content:center;align-items:center}
+.kbd-hint kbd{display:inline-block;font-family:Consolas,"Courier New",monospace;font-size:10.5px;color:var(--cyan);
+  border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 7px;background:rgba(62,230,255,.06);margin-right:6px}
+@keyframes blink{50%{opacity:.35}}
+@media(max-width:640px){.hero-title{font-size:30px;letter-spacing:2px}.hero-kicker{letter-spacing:4px;font-size:11.5px}}
+section.chapter{padding:58px 0 8px}
+.ch-no{font-size:13px;letter-spacing:6px;color:var(--dim2)}
+.ch-title{font-size:30px;font-weight:900;letter-spacing:3px;color:#fff;text-shadow:0 0 16px rgba(62,230,255,.55);margin:8px 0 6px}
+.ch-sub{font-size:14.5px;color:var(--dim);margin-bottom:24px;max-width:820px}
+h3.mini{font-size:16px;color:var(--cyan);letter-spacing:1px;margin:26px 0 10px;font-weight:900;scroll-margin-top:calc(var(--toph) + 18px)}
+/* 节标题（h3.mini 即本文档的节标题级）横幅提级，同《第二大脑使用说明》2026-10-14 推广版 */
+h3.mini{font-size:20px;color:#eafcff;padding:11px 16px;border-left:4px solid var(--cyan);border-radius:0 12px 12px 0;background:linear-gradient(90deg,rgba(62,230,255,.17),rgba(62,230,255,.05) 55%,transparent);text-shadow:0 0 16px rgba(62,230,255,.45)}
+h3.mini::before{content:"▸ ";color:var(--cyan);font-size:22px}
+
+/* ============ 卡片组件 ============ */
+.chip{display:inline-block;font-size:11.5px;border:1px solid var(--line);border-radius:20px;padding:2px 11px;color:#bfeeff;background:rgba(62,230,255,.06)}
+.chip.y{color:#ffe6ad;border-color:rgba(255,201,77,.4);background:rgba(255,201,77,.07)}
+.card{border:1px solid var(--line);border-radius:15px;padding:20px 22px;position:relative;
+  background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95));
+  box-shadow:0 0 28px rgba(62,230,255,.10), inset 0 0 36px rgba(4,10,20,.5)}
+.card::before,.card::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.card::before{left:-1px;top:-1px;border-left:3px solid var(--cyan);border-top:3px solid var(--cyan)}
+.card::after{right:-1px;bottom:-1px;border-right:3px solid var(--cyan);border-bottom:3px solid var(--cyan)}
+.tag{display:inline-block;font-size:12px;letter-spacing:2px;color:var(--cyan);border:1px solid var(--line2);border-radius:20px;padding:2px 13px;background:rgba(62,230,255,.08)}
+ul.pts{list-style:none;padding:0}
+ul.pts li{padding:4px 0 4px 24px;position:relative;font-size:14px;color:#d7e8fb;line-height:1.85}
+ul.pts li::before{position:absolute;left:2px;font-weight:900}
+li.ok::before{content:"✓";color:var(--green)} li.todo::before{content:"◇";color:var(--amber)} li.wip::before{content:"△";color:var(--violet)}
+li.b::before{content:"▸";color:var(--cyan);font-size:12px;top:6px}
+em{font-style:normal;color:var(--cyan)}
+h4.part{font-size:20px;color:#fff;letter-spacing:2px;margin:36px 0 12px;font-weight:900;padding:10px 16px;border-left:4px solid var(--green);border-radius:0 10px 10px 0;background:linear-gradient(90deg,rgba(65,255,163,.14),rgba(65,255,163,.03) 55%,transparent);text-shadow:0 0 12px rgba(65,255,163,.35)}
+h4.part.todo{border-left-color:var(--amber);background:linear-gradient(90deg,rgba(255,201,77,.14),rgba(255,201,77,.03) 55%,transparent);text-shadow:0 0 12px rgba(255,201,77,.35)}
+.role{font-size:13.5px;color:#bfeeff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;background:rgba(62,230,255,.05);margin:12px 0 8px;line-height:1.8}
+.board{margin:16px 0}
+.flowline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-start;margin:10px 0 6px 24px}
+.fl-node{border:1px solid var(--line);border-radius:10px;padding:7px 12px;font-size:13px;font-weight:700;background:rgba(62,230,255,.06);color:#d7f2ff;text-align:center}
+.fl-node.y{border-color:rgba(255,201,77,.5);background:rgba(255,201,77,.07);color:#ffe9c2}
+.fl-arrow{color:var(--dim2);font-size:15px}
+.whygrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+@media(max-width:840px){.whygrid{grid-template-columns:1fr}}
+.why{border:1px solid var(--line);border-radius:13px;padding:16px 18px;background:linear-gradient(180deg,rgba(13,28,48,.94),rgba(6,13,26,.95))}
+.why .wn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;border:1.5px solid var(--line2);color:var(--cyan);font-weight:900;margin-bottom:8px;background:rgba(62,230,255,.08)}
+.why h5{font-size:15.5px;color:#fff;letter-spacing:1px;margin-bottom:5px}
+.why p{font-size:13px;color:var(--dim);line-height:1.85}
+.dataflow{font-family:Consolas,"Courier New",monospace;font-size:12.5px;line-height:2;color:#bfe0ff;background:#050c17;border:1px solid var(--line);border-radius:11px;padding:16px 20px;white-space:pre-wrap}
+.dataflow .k{color:var(--cyan)} .dataflow .a{color:var(--amber)} .dataflow .d{color:var(--amber);font-weight:900} .dataflow .g{color:var(--green)}
+
+/* ============ 勾选条目（任务推进预设的子任务清单用）：纯本地勾选 ============ */
+.chk{display:block;padding:6px 10px;margin:3px 0;border-radius:8px;cursor:pointer;transition:.15s;
+  font-size:13.5px;color:#d7e8fb;line-height:1.6}
+.chk:hover{background:rgba(62,230,255,.06)}
+.chk input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border:1.5px solid var(--line2);border-radius:5px;
+  vertical-align:-3px;margin-right:10px;cursor:pointer;position:relative;transition:.15s}
+.chk input:checked{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(62,230,255,.5)}
+.chk input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:900;color:#04222e}
+.chk:has(input:checked){color:var(--dim2);text-decoration:line-through;text-decoration-color:rgba(62,230,255,.5)}
+
+/* ============ 部分尾翻页 ============ */
+.pager{display:flex;justify-content:space-between;gap:12px;margin:38px 0 0}
+.pg{flex:1;border:1px solid var(--line);border-radius:11px;padding:12px 16px;color:var(--dim);text-decoration:none;
+  font-size:13px;background:rgba(8,16,30,.8);transition:.15s;line-height:1.6;cursor:pointer}
+.pg:hover{color:var(--cyan);border-color:var(--line2);box-shadow:0 0 18px rgba(62,230,255,.12)}
+.pg i{display:block;font-style:normal;font-size:10.5px;letter-spacing:2px;color:var(--dim2);margin-bottom:2px}
+.pg.next{text-align:right}
+.pg.next i{text-align:right}
+
+.foot{text-align:center;font-size:11px;color:var(--dim2);letter-spacing:1px;line-height:2;margin-top:70px}
+</style>
+</head>
+<body class="right-closed">
+<div id="prog"></div>
+
+<!-- ══════════ 顶部板块页签：一个 .tab 对应一个 .panel（板块只在这里加） ══════════ -->
+<header id="topbar">
+  <div class="tb-brand"><span class="sb-dot"></span><b>站点名占位</b><i>PRODUCT · 副题占位</i></div>
+  <nav id="tabs">
+    <button class="tab on" data-panel="p1">板块一 · 模板说明</button>
+    <button class="tab" data-panel="p2">板块二 · 预设：产品说明</button>
+    <button class="tab" data-panel="p3">板块三 · 预设：项目推进</button>
+  </nav>
+</header>
+
+<!-- ══════════ 左侧目录栏：当前板块的部分(.side-link) + 小节(.side-sub，最多嵌套一层)；
+     每个条目和分组标题都标 data-panel，随板块显隐 ══════════ -->
+<aside id="side">
+  <nav class="side-nav">
+    <div class="side-group" data-panel="p1">板块一 · 模板说明</div>
+    <a class="side-link" href="#p1-a1" data-panel="p1">部分一 · 固定与可变总账</a>
+    <a class="side-link" href="#p1-a2" data-panel="p1">部分二 · 界面骨架与快捷键</a>
+    <a class="side-link" href="#p1-a3" data-panel="p1">部分三 · 内容组件与状态</a>
+    <a class="side-sub" href="#p1-a3-s1" data-panel="p1">内容卡与状态标记</a>
+    <a class="side-sub" href="#p1-a3-s2" data-panel="p1">流程卡 · 网格卡 · 数据流</a>
+    <a class="side-link" href="#p1-a4" data-panel="p1">部分四 · 两个预设怎么套用</a>
+    <div class="side-group" data-panel="p2">板块二 · 预设：产品说明</div>
+    <a class="side-link" href="#p2-a1" data-panel="p2">部分一 · 总览与设计哲学</a>
+    <a class="side-link" href="#p2-a2" data-panel="p2">部分二 · 产品大致结构</a>
+    <a class="side-link" href="#p2-a3" data-panel="p2">部分三 · 说明的板块地图</a>
+    <a class="side-link" href="#p2-a4" data-panel="p2">部分四 · 功能板块内部模板</a>
+    <div class="side-group" data-panel="p3">板块三 · 预设：项目推进</div>
+    <a class="side-link" href="#p3-a1" data-panel="p3">部分一 · 任务一 总览（勾选）</a>
+    <a class="side-link" href="#p3-a2" data-panel="p3">部分二 · 任务二 总览（勾选）</a>
+    <a class="side-link" href="#p3-a3" data-panel="p3">部分三 · 执行顺序与要点</a>
+    <a class="side-link" href="#p3-a4" data-panel="p3">子任务四要素 · 详情板块模板</a>
+  </nav>
+  <div class="side-foot">本地文档 · 无需上线<br>← 目录 · → 右栏 · Esc 收</div>
+</aside>
+
+<!-- ══════════ 右侧栏（占位）：内容未定，按 → 或右上角按钮调出，用法与左栏镜像 ══════════ -->
+<aside id="sideR">
+  <div class="side-title">右栏 · 占位</div>
+  <p class="role" style="margin:6px 0 10px">这里放什么还没想好——先留壳：可以放页面大纲、收藏书签、显示设置等。</p>
+  <div class="side-link">占位条目一</div>
+  <div class="side-link">占位条目二</div>
+  <div class="side-link">占位条目三</div>
+  <div class="side-foot">按 → 键或右上角按钮开合</div>
+</aside>
+<div id="scrim"></div>
+<button id="burger" title="打开目录">&#9776;</button>
+<button id="burgerR" title="打开右栏">&#9776;</button>
+
+<!-- ══════════ 主内容区：一个 .panel = 一个板块；.chapter = 部分；h3.mini[id] = 小节 ══════════ -->
+<div id="main">
+<div id="wrap">
+
+<!-- ══════════════════ 板块一 · 模板说明（所有部件的用法都在这里，常看常查） ══════════════════ -->
+<section class="panel on" id="p1">
+  <section id="hero">
+    <div class="hero-kicker rv">PANEL 1 · 板块一</div>
+    <h1 class="hero-title rv d1">这套<em>模板</em>怎么用</h1>
+    <p class="hero-sub rv d2">骨架固定、内容待填——所有部件的样式与用法都汇总在本板块。<br>板块二、三是两个现成预设：套用时整体换成你自己的内容。</p>
+    <div class="rv d3" style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+      <span class="chip">板块一 · 说明</span>
+      <span class="chip">板块二 · 产品说明预设</span>
+      <span class="chip">板块三 · 项目推进预设</span>
+    </div>
+    <div class="kbd-hint rv"><span><kbd>←</kbd>左目录 开/收</span><span><kbd>→</kbd>右栏 开/收</span><span><kbd>Esc</kbd>收起两侧</span></div>
+    <div class="scroll-hint">▾ 向下滚动 · 或点左侧目录 ▾</div>
+  </section>
+
+  <section class="chapter" id="p1-a1">
+    <div class="ch-no rv">PART 1 · 部分一</div>
+    <h2 class="ch-title rv">固定与可变 · 总账</h2>
+    <p class="ch-sub rv">套模板前先分清哪些不能动、哪些随便换——这一页所有「占位」字样都是换内容的地方。</p>
+    <div class="card rv board">
+      <span class="tag">固定与可变的分账</span>
+      <ul class="pts">
+        <li class="b"><b>固定的（骨架，不要改）</b>：色调 UI、顶部板块页签流转、左栏双层目录、右栏壳、快捷键 <em>← / → / Esc</em>、层级结构（板块→部分→小节）与各级标题样式、状态标记；</li>
+        <li class="todo"><b>每次要填的（内容）</b>：板块名、部分名、小节名、全部正文；</li>
+        <li class="ok"><b>加层级的固定动作</b>：见下方「加板块 / 加部分 / 加小节」数据流卡——id 对上，跳转/高亮全自动。</li>
+      </ul>
+    </div>
+    <div class="card rv board">
+      <span class="tag">加板块 / 加部分 / 加小节的固定动作</span>
+      <div class="dataflow"><span class="k">加板块</span>（顶部页签 + 整块面板）：
+  顶部 &lt;nav id="tabs"&gt; 加一个 .tab（data-panel="pN"）
+  主区加 &lt;section class="panel" id="pN"&gt;
+  左栏条目都标 data-panel="pN"
+<span class="k">加部分</span>（板块内一节）：
+  主区 &lt;section class="chapter" id="pN-aM"&gt; + 左栏 &lt;a class="side-link"&gt;
+<span class="k">加小节</span>（部分内一层，最多嵌套这层）：
+  标题 &lt;h3 class="mini" id="pN-aM-sK"&gt; + 左栏 &lt;a class="side-sub"&gt;
+  <span class="d">← id 对上即可，JS 不用改</span></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="p1-a2">
+    <div class="ch-no rv">PART 2 · 部分二</div>
+    <h2 class="ch-title rv">界面骨架与快捷键</h2>
+    <p class="ch-sub rv">顶部页签、左右两栏、收放按钮和快捷键——这些是每一份套用产出都自带的界面骨架。</p>
+    <div class="card rv board">
+      <span class="tag">三处导航的关系</span>
+      <div class="flowline" style="margin-left:0">
+        <div class="fl-node">顶部页签<br><span style="font-size:11.5px;font-weight:400">切板块（界面整体换）</span></div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node">左栏目录<br><span style="font-size:11.5px;font-weight:400">跳部分/小节（板块内定位）</span></div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node y">滚动高亮<br><span style="font-size:11.5px;font-weight:400">当前读到哪，左栏亮到哪</span></div>
+      </div>
+      <ul class="pts" style="margin-top:8px">
+        <li class="b"><b>左栏</b>：左上角按钮随时收/展；宽屏收起后内容占满整窗，窄屏默认收成抽屉；</li>
+        <li class="b"><b>右栏</b>：内容未定的占位壳，用法与左栏镜像（右上角按钮开合）；</li>
+        <li class="ok"><b>快捷键</b>：<em>←</em> 左目录开/收 · <em>→</em> 右栏开/收 · <em>Esc</em> 收起两侧。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="p1-a3">
+    <div class="ch-no rv">PART 3 · 部分三</div>
+    <h2 class="ch-title rv">内容组件与状态</h2>
+    <p class="ch-sub rv">写正文用的所有卡片部件都在这里——需要什么取什么，文字全部由项目填。</p>
+
+    <h3 class="mini rv" id="p1-a3-s1">内容卡与状态标记</h3>
+    <div class="card rv board">
+      <span class="tag">内容卡 · .card + .tag + .role + ul.pts</span>
+      <p class="role">一句话说明条（.role）——概括这张卡片讲什么。</p>
+      <ul class="pts">
+        <li class="b"><b>普通条目</b>：正文占位——<em>em 是青色强调</em>，<b>关键处加粗变琥珀</b>。</li>
+        <li class="ok">状态条目（li.ok ✓）——已完成 / 已确认的事。</li>
+        <li class="wip">状态条目（li.wip △）——进行中的事。</li>
+        <li class="todo">状态条目（li.todo ◇）——待办 / 未完成的事。</li>
+      </ul>
+    </div>
+    <p class="role" style="margin-top:10px">状态标记是固定组件，有需要就取用：<b>▸ 普通 · ✓ 完成 · △ 进行中 · ◇ 待办</b>——换 li 的 class 即可，文字全部由项目填。</p>
+
+    <h3 class="mini rv" id="p1-a3-s2">流程卡 · 网格卡 · 数据流</h3>
+    <div class="card rv board">
+      <span class="tag">流程卡 · .flowline</span>
+      <div class="flowline" style="margin-left:0">
+        <div class="fl-node">第一步<br><span style="font-size:11.5px;font-weight:400">动作占位</span></div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node">第二步<br><span style="font-size:11.5px;font-weight:400">动作占位</span></div>
+        <span class="fl-arrow">→</span>
+        <div class="fl-node y">第三步<br><span style="font-size:11.5px;font-weight:400">重点环节用 .y</span></div>
+      </div>
+    </div>
+    <div class="whygrid" style="margin:16px 0">
+      <div class="why rv"><div class="wn">1</div><h5>网格卡占位</h5><p>两列网格卡片（.whygrid），格子数量随意，窄屏自动变单列。</p></div>
+      <div class="why rv"><div class="wn">2</div><h5>网格卡占位</h5><p>序号块 .wn、标题 h5、说明 p 三件套。</p></div>
+    </div>
+    <div class="card rv board">
+      <span class="tag">数据流 / 目录树 · .dataflow</span>
+      <div class="dataflow"><span class="k">起点</span> ——流程或结构的名字
+  <span class="d">▼ 步骤推进备注</span>
+├── <span class="a">子项一/</span>            <span class="d">← 行尾备注</span>
+└── <span class="a">子项二/</span>
+<span class="g">终点（绿色）</span></div>
+    </div>
+  </section>
+
+  <section class="chapter" id="p1-a4">
+    <div class="ch-no rv">PART 4 · 部分四</div>
+    <h2 class="ch-title rv">两个预设怎么套用</h2>
+    <p class="ch-sub rv">板块二、三、四是写好的起跑线——选贴近需求的那个，把「占位」逐个换成自己的内容即可。</p>
+    <div class="whygrid" style="margin-top:10px">
+      <div class="why rv"><div class="wn">二</div><h5>预设 · 产品说明</h5><p>结构：<b>总览与设计哲学 → 产品大致结构 → 说明的板块地图 → 各功能板块详解</b>（每个功能板块固定三讲：定位 → 结构 → 使用与 DIY）。适合介绍一个产品/工具/系统。</p></div>
+      <div class="why rv"><div class="wn">三</div><h5>预设 · 项目推进</h5><p>结构：<b>任务总览勾选 → 执行顺序与要点 → 各任务详情板块</b>（子任务四要素）。适合独立想法、长期项目、梳理思路——顺序是预估推进，要点自己填。</p></div>
+    </div>
+    <div class="card rv board" style="margin-top:16px">
+      <span class="tag">套用口诀</span>
+      <ul class="pts">
+        <li class="b"><b>先逛板块一</b>：认识每个部件长什么样、在哪改；</li>
+        <li class="b"><b>再挑预设</b>：介绍产品用板块二，推项目用板块三，都不贴就照板块一的部件自由拼；</li>
+        <li class="ok"><b>最后整体换内容</b>：选定的预设板块（其余板块删掉或留作说明）里所有「占位」逐个替换——骨架永远不用动。</li>
+      </ul>
+    </div>
+  </section>
+</section>
+
+<!-- ══════════════════ 板块二 · 预设：产品说明（套用时整体换成你的产品） ══════════════════ -->
+<section class="panel" id="p2">
+  <section id="hero">
+    <div class="hero-kicker rv">PANEL 2 · 板块二</div>
+    <h1 class="hero-title rv d1">预设 · <em>产品说明</em></h1>
+    <p class="hero-sub rv d2">现成的产品说明骨架：<b>总览 → 产品大致结构 → 说明的板块地图 → 各功能板块详解</b>。<br>每个功能板块内部固定三讲：<b>定位 → 结构 → 使用与 DIY</b>；套用时全部占位换成你的产品。</p>
+    <div class="kbd-hint rv"><span><kbd>←</kbd>左目录 开/收</span><span><kbd>→</kbd>右栏 开/收</span><span><kbd>Esc</kbd>收起两侧</span></div>
+    <div class="scroll-hint">▾ 向下滚动 · 或点左侧目录 ▾</div>
+  </section>
+
+  <section class="chapter" id="p2-a1">
+    <div class="ch-no rv">PART 1 · 部分一</div>
+    <h2 class="ch-title rv">总览 · 定位与设计哲学</h2>
+    <p class="ch-sub rv">开篇总览：这个产品是什么、为什么做、给谁用、背后相信什么。</p>
+    <div class="card rv board">
+      <span class="tag">定位与哲学卡 · 占位</span>
+      <p class="role">一句话定位——「产品名」是给谁、用来做什么的。</p>
+      <ul class="pts">
+        <li class="b"><b>现状</b>：没它之前，是怎么样的？痛点是什么样的；</li>
+        <li class="b"><b>如何解决</b>：它具体是怎么解决这些痛点的；</li>
+        <li class="wip"><b>给谁用</b>：适用对象、什么时候用；</li>
+        <li class="todo"><b>设计哲学</b>：产品的取舍与相信——为什么长这样而不是那样。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="p2-a2">
+    <div class="ch-no rv">PART 2 · 部分二</div>
+    <h2 class="ch-title rv">产品大致结构</h2>
+    <p class="ch-sub rv">介绍产品由几大块组成、相互怎么配合——读者看完知道整个产品的骨架。</p>
+    <div class="card rv board">
+      <span class="tag">整体结构 · 占位</span>
+      <div class="dataflow"><span class="k">产品名</span> ——整体结构占位
+├── <span class="a">组成一/</span>            <span class="d">← 一句话职责</span>
+├── <span class="a">组成二/</span>
+└── <span class="a">组成三/</span>
+  <span class="d">▼ 各组成如何配合</span>
+<span class="g">跑起来之后的样子</span></div>
+      <ul class="pts" style="margin-top:8px">
+        <li class="b"><b>组成说明</b>：每一块是干什么的、边界在哪；</li>
+        <li class="b"><b>配合关系</b>：数据/流程怎么在组成之间流转。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="p2-a3">
+    <div class="ch-no rv">PART 3 · 部分三</div>
+    <h2 class="ch-title rv">说明的板块地图</h2>
+    <p class="ch-sub rv">给读者的导读：本说明设立了哪些板块、每个板块讲什么、按什么顺序读。</p>
+    <div class="card rv board">
+      <span class="tag">板块地图 · 占位</span>
+      <div class="dataflow"><span class="k">板块一</span> 总览（定位与设计哲学 + 产品大致结构）
+  <span class="d">▼ 先认识它</span>
+<span class="k">板块二</span> 安装与设置
+  <span class="d">← 可选板块：产品需要搭环境才写；没有就跳过，直接读板块三</span>
+<span class="k">板块三往后</span> 各功能板块详解（一个功能板块讲一个部分）
+  <span class="d">▼ 每个功能板块内部固定三讲</span>
+第一讲 <span class="a">定位</span>（解决什么、有什么用）
+第二讲 <span class="a">结构</span>（文件结构 / 数据流转结构）
+第三讲 <span class="a">使用与 DIY</span>（怎么用、哪些地方可以自定义）</div>
+      <ul class="pts" style="margin-top:8px">
+        <li class="b"><b>怎么用这张地图</b>：按顺序读即可；赶时间可跳过可选板块，直接进功能板块；</li>
+        <li class="ok"><b>套用提示</b>：板块数量由产品决定——地图上有几个板块，说明就挂几个板块页签。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="p2-a4">
+    <div class="ch-no rv">PART 4 · 部分四</div>
+    <h2 class="ch-title rv">功能板块的内部模板</h2>
+    <p class="ch-sub rv">板块三往后的每个功能板块都长这样——三讲固定，内容各填各的。</p>
+    <div class="whygrid" style="margin-top:10px">
+      <div class="why rv"><div class="wn">一</div><h5>第一讲 · 定位</h5><p>这个小部分是干什么的、解决的东西是什么、有什么用——先说清存在的理由。</p></div>
+      <div class="why rv"><div class="wn">二</div><h5>第二讲 · 结构</h5><p>它的结构：文件结构、数据流转结构或其他组成——用 .dataflow 画树最直观。</p></div>
+    </div>
+    <div class="card rv board" style="margin-top:14px">
+      <span class="tag">第三讲 · 使用与 DIY（内容卡示范 · 占位）</span>
+      <p class="role">一句话说明条——这个小部分日常怎么用。</p>
+      <ul class="pts">
+        <li class="b"><b>基本用法</b>：操作步骤占位；</li>
+        <li class="b"><b>进阶用法</b>：组合技巧占位；</li>
+        <li class="wip"><b>可以 DIY 的地方</b>：哪些参数/样式/结构允许按需改；</li>
+        <li class="todo"><b>常见问题</b>：卡住时怎么办。</li>
+      </ul>
+    </div>
+  </section>
+</section>
+
+<!-- ══════════════════ 板块三 · 预设：项目推进（独立想法 · 长期项目 · 梳理思路） ══════════════════ -->
+<section class="panel" id="p3">
+  <section id="hero">
+    <div class="hero-kicker rv">PANEL 3 · 板块三</div>
+    <h1 class="hero-title rv d1">预设 · <em>项目推进</em></h1>
+    <p class="hero-sub rv d2">任何独立的想法、独立的项目——长期要做的事、需要梳理思路的事，都用这套。<br>板块一是总览：每部分一个任务+子任务清单直接勾选；总览后设「执行顺序与要点」；每个任务再拆详情板块按四要素展开。</p>
+    <div class="kbd-hint rv"><span><kbd>←</kbd>左目录 开/收</span><span><kbd>→</kbd>右栏 开/收</span><span><kbd>Esc</kbd>收起两侧</span></div>
+    <div class="scroll-hint">▾ 向下滚动 · 或点左侧目录 ▾</div>
+  </section>
+
+  <section class="chapter" id="p3-a1">
+    <div class="ch-no rv">PART 1 · 部分一</div>
+    <h2 class="ch-title rv">任务一 · 名称占位</h2>
+    <p class="ch-sub rv">任务目标一句话占位——完成下面全部子任务，这个任务就完成。</p>
+    <div class="card rv board">
+      <span class="tag">子任务清单 · 勾选推进</span>
+      <label class="chk"><input type="checkbox" id="t1-s1">子任务一 · 占位：要完成什么</label>
+      <label class="chk"><input type="checkbox" id="t1-s2">子任务二 · 占位：要完成什么</label>
+      <label class="chk"><input type="checkbox" id="t1-s3">子任务三 · 占位：要完成什么</label>
+    </div>
+    <p class="role" style="margin-top:10px">有几个任务就照这样加几个部分；子任务要展开细节时，拆到独立板块按四要素写（见部分四）。</p>
+  </section>
+
+  <section class="chapter" id="p3-a2">
+    <div class="ch-no rv">PART 2 · 部分二</div>
+    <h2 class="ch-title rv">任务二 · 名称占位</h2>
+    <p class="ch-sub rv">下一个任务占位——同样只列任务名与子任务清单，勾选推进。</p>
+    <div class="card rv board">
+      <span class="tag">子任务清单 · 勾选推进</span>
+      <label class="chk"><input type="checkbox" id="t2-s1">子任务一 · 占位：要完成什么</label>
+      <label class="chk"><input type="checkbox" id="t2-s2">子任务二 · 占位：要完成什么</label>
+    </div>
+    <p class="role" style="margin-top:10px">板块数量随任务数增减：几个任务就配几个总览部分 + 几个详情板块。</p>
+  </section>
+
+  <section class="chapter" id="p3-a3">
+    <div class="ch-no rv">PART 3 · 部分三</div>
+    <h2 class="ch-title rv">执行顺序与要点</h2>
+    <p class="ch-sub rv">总览之后先定推进设计——顺序是预估不是死表，要点是干法与坑，全部由项目自己填。</p>
+    <div class="card rv board">
+      <span class="tag">执行顺序 · 预估推进</span>
+      <div class="dataflow"><span class="k">任务一</span> ——预计什么时候完成什么事（占位）
+  <span class="d">▼ 预估推进的进展</span>
+<span class="k">任务二</span> ——预计什么时候完成什么事（占位）
+  <span class="d">← 都是预估：大概的节奏，不卡死时间，推进中随时改</span></div>
+    </div>
+    <div class="card rv board">
+      <span class="tag">执行要点 · 怎么干</span>
+      <ul class="pts">
+        <li class="b"><b>要点占位一</b>：这件事具体怎么干；</li>
+        <li class="b"><b>要点占位二</b>：干的过程中注意什么；</li>
+        <li class="todo"><b>容易踩的坑</b>：提前写下来提醒自己。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="chapter" id="p3-a4">
+    <div class="ch-no rv">任务详情板块 · 每个任务拆一个</div>
+    <h2 class="ch-title rv">子任务四要素 · 详情板块模板</h2>
+    <p class="ch-sub rv">板块一只管勾选；任务的详细推进拆到独立板块（套用后：板块二=任务一详情、板块三=任务二详情……）。每个子任务按四要素展开，详情板块不放勾选。</p>
+    <div class="card rv board">
+      <span class="tag">子任务四要素卡 · 占位</span>
+      <ul class="pts">
+        <li class="b"><b>要完成什么</b>：这个子任务的产出占位；</li>
+        <li class="b"><b>现状</b>：手头上有什么资料、什么资源；</li>
+        <li class="wip"><b>目标</b>：做到什么样算完成——要可验收；</li>
+        <li class="todo"><b>预估时间</b>：大概多久、截止什么时候。</li>
+      </ul>
+    </div>
+    <p class="role" style="margin-top:10px">顺序固定：<b>要完成什么 → 现状 → 目标 → 预估时间</b>；一个子任务一张卡，做完回板块一勾掉。</p>
+  </section>
+</section>
+
+<div class="foot rv">深空风格 · 板块导航模板 · 2026-10-12 · 布局形式模仿 api-docs.deepseek.com<br>复用＝复制本文件替换占位内容——style 公共层冻结不要改</div>
+</div>
+</div>
+<script>
+"use strict";
+/* 入场渐显 */
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}})},{threshold:.12});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+/* 顶部进度条 */
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('prog').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100).toFixed(2)+'%'},{passive:true});
+
+/* ── 侧栏开合：左上角按钮随时切换；窄屏默认收起；跨断点自动回默认态 ── */
+const scrim=document.getElementById('scrim');
+const burger=document.getElementById('burger');
+const MQ=matchMedia('(max-width:960px)');
+function setSide(closed){
+  document.body.classList.toggle('side-closed',closed);
+  burger.innerHTML=closed?'&#9776;':'&#9664;';
+  burger.title=closed?'打开目录':'收起目录';
+}
+function applyDefault(){setSide(MQ.matches)}
+if(MQ.addEventListener)MQ.addEventListener('change',applyDefault);else MQ.addListener(applyDefault);
+applyDefault();
+burger.addEventListener('click',function(){setSide(!document.body.classList.contains('side-closed'))});
+scrim.addEventListener('click',function(){setSide(true);setRight(true)});
+/* 右侧栏（占位）：与左栏镜像，所有尺寸默认收起，静态 body.right-closed 起步 */
+const burgerR=document.getElementById('burgerR');
+function setRight(closed){
+  document.body.classList.toggle('right-closed',closed);
+  burgerR.innerHTML=closed?'&#9776;':'&#9654;';
+  burgerR.title=closed?'打开右栏':'收起右栏';
+}
+burgerR.addEventListener('click',function(){setRight(!document.body.classList.contains('right-closed'))});
+/* 快捷键：← 左目录开/收 · → 右栏开/收 · Esc 收两侧 */
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowLeft'){e.preventDefault();setSide(!document.body.classList.contains('side-closed'))}
+  else if(e.key==='ArrowRight'){e.preventDefault();setRight(!document.body.classList.contains('right-closed'))}
+  else if(e.key==='Escape'){setSide(true);setRight(true)}
+});
+/* 勾选记忆：子任务勾选存 localStorage，纯本地，无任何数据流转 */
+document.querySelectorAll('.chk input[type=checkbox]').forEach(function(c){
+  if(!c.id)return;
+  var k='chk_'+c.id;
+  try{ if(localStorage.getItem(k)==='1') c.checked=true; }catch(e){}
+  c.addEventListener('change',function(){ try{ localStorage.setItem(k, c.checked?'1':'0'); }catch(e){} });
+});
+/* 复杂增量联动：详情子任务全勾 → 总览对应项自动勾上（toast 提示） */
+document.querySelectorAll('input[data-parent]').forEach(function(c){
+  c.addEventListener('change',function(){
+    var pid=c.getAttribute('data-parent'), p=document.getElementById(pid);
+    if(!p)return;
+    var sibs=document.querySelectorAll('input[data-parent="'+pid+'"]'), all=true;
+    sibs.forEach(function(x){ if(!x.checked) all=false; });
+    if(all && !p.checked){
+      p.checked=true;
+      try{ localStorage.setItem('chk_'+pid,'1'); }catch(e){}
+      toast('子任务全勾——总览对应项已自动勾上');
+    }else if(!all && p.checked){
+      p.checked=false;
+      try{ localStorage.setItem('chk_'+pid,'0'); }catch(e){}
+      toast('有子任务取消——总览对应项已同步取消');
+    }
+  });
+});
+
+/* ── 板块切换 + 双层目录导航 ── */
+const tabs=[...document.querySelectorAll('#tabs .tab')];
+const panels=[...document.querySelectorAll('.panel')];
+const links=[...document.querySelectorAll('.side-link,.side-sub,.pg')];
+function curPanel(){for(var i=0;i<panels.length;i++)if(panels[i].classList.contains('on'))return panels[i];return null}
+function elTop(el){return el.getBoundingClientRect().top+scrollY}
+function scrollToEl(el){scrollTo({top:elTop(el)-70,behavior:'smooth'})}
+function openPanel(pid,anchor){
+  panels.forEach(function(p){p.classList.toggle('on',p.id===pid)});
+  tabs.forEach(function(t){t.classList.toggle('on',t.dataset.panel===pid)});
+  document.querySelectorAll('#side [data-panel]').forEach(function(el){
+    el.style.display=(el.dataset.panel===pid)?'':'none';
+  });
+  if(anchor){
+    var el=document.getElementById(anchor);
+    if(el)setTimeout(function(){scrollToEl(el)},30);
+  }else scrollTo({top:0,behavior:'auto'});
+  history.replaceState(null,'','#'+pid);
+  spy();
+}
+tabs.forEach(function(t){t.addEventListener('click',function(){openPanel(t.dataset.panel)})});
+links.forEach(function(a){a.addEventListener('click',function(e){
+  e.preventDefault();
+  var id=a.getAttribute('href').slice(1);
+  var el=document.getElementById(id);if(!el)return;
+  var pn=el.closest('.panel');
+  var pid=pn?pn.id:panels[0].id;
+  if(!curPanel()||pid!==curPanel().id)openPanel(pid,id);else scrollToEl(el);
+  if(MQ.matches)setSide(true);
+})});
+/* 滚动高亮：只在当前板块的条目里选 */
+function spy(){
+  var cp=curPanel();if(!cp)return;
+  var cands=[];
+  links.forEach(function(a){
+    var el=document.querySelector(a.getAttribute('href'));
+    if(el&&cp.contains(el))cands.push({a:a,el:el});
+  });
+  if(!cands.length)return;
+  var y=scrollY+95,cur=cands[0];
+  cands.forEach(function(o){if(elTop(o.el)<=y)cur=o});
+  if(scrollY+innerHeight>=document.documentElement.scrollHeight-40)cur=cands[cands.length-1];
+  links.forEach(function(a){a.classList.toggle('on',a===cur.a)});
+}
+addEventListener('scroll',spy,{passive:true});addEventListener('resize',spy);
+/* 初始板块：URL 带面板/锚点 hash 则打开对应板块，否则第一个 */
+(function(){
+  function findPanel(el){while(el){if(el.classList&&el.classList.contains('panel'))return el;el=el.parentElement}return null}
+  var h=location.hash.replace('#','');
+  var p=h?document.getElementById(h):null;
+  var pn=p?findPanel(p):null;
+  var pid=pn?pn.id:(panels[0]?panels[0].id:null);
+  if(pid)openPanel(pid,(pn&&p.id!==pn.id)?h:null);
+})();
+</script>
+</body>
+</html>

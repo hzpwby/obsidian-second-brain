@@ -1,0 +1,19 @@
+/* 隐藏 Tasks 查询的搜索/筛选工具栏 */
+.plugin-tasks-toolbar {
+  display: none !important;
+}
+
+/* 隐藏任务计数（"1 task"） */
+.task-count {
+  display: none !important;
+}
+
+/* 隐藏日期标签（S0、TS、D2026-05-12 等） */
+.task-scheduled,
+.task-start,
+.task-due,
+.task-done,
+.task-cancelled,
+.task-created {
+  display: none !important;
+}

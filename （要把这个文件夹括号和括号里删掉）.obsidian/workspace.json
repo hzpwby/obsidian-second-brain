@@ -1,0 +1,256 @@
+{
+  "main": {
+    "id": "5324373015726ba8",
+    "type": "split",
+    "children": [
+      {
+        "id": "4509724f8bf84da7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e7a7b303c61786dc",
+            "type": "leaf",
+            "state": {
+              "type": "canvas",
+              "state": {
+                "file": "🏠Home.canvas",
+                "viewState": {
+                  "x": -648.5,
+                  "y": -35,
+                  "zoom": 0
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "🏠Home"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "55d2ed06d177575d",
+    "type": "split",
+    "children": [
+      {
+        "id": "9727ddcc7b41d788",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "742ab335f4e7e280",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": true
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "c46b004314a44181",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "38859bc3bbcf9b73",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 315.5016098022461
+  },
+  "right": {
+    "id": "2236821b7f99c58f",
+    "type": "split",
+    "children": [
+      {
+        "id": "b0b14c0ec4ac6f1f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2d74b79dd1a32aea",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "🏠Home.canvas",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "🏠Home 的反向链接列表"
+            }
+          },
+          {
+            "id": "a674647169d3a4b3",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "🏠Home.canvas",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "🏠Home 的出链列表"
+            }
+          },
+          {
+            "id": "1582c20886065793",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "864af76767a00495",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "4880264efe082630",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "🏠Home.canvas",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "🏠Home 的大纲"
+            }
+          },
+          {
+            "id": "385bdc31a43ad55e",
+            "type": "leaf",
+            "state": {
+              "type": "nutstore-sync-chatbox",
+              "state": {},
+              "icon": "lucide-ghost",
+              "title": "nutstore-sync-chatbox"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": true,
+      "graph:查看关系图谱": true,
+      "canvas:新建白板": true,
+      "templates:插入模板": true,
+      "command-palette:打开命令面板": true,
+      "markdown-importer:打开 Markdown 格式转换器": true,
+      "zk-prefixer:创建时间戳笔记": true,
+      "audio-recorder:开始/结束录音": true,
+      "workspaces:管理工作区布局": true,
+      "bases:新建数据库": true,
+      "nutstore-sync:Start sync": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "homepage:Open homepage": true,
+      "templater-obsidian:Templater": true,
+      "nutstore-sync:Stop sync": true,
+      "nutstore-sync:Open chatbox": true
+    }
+  },
+  "active": "e7a7b303c61786dc",
+  "lastOpenFiles": [
+    "🏠Home.canvas",
+    "_extracted_text.txt",
+    "待办事项/起念.md",
+    "日志/复盘目录/月复盘与规划目录/2026年，月复盘与规划目录.base",
+    "日志/复盘目录/月复盘与规划目录.base",
+    "日志/日复盘/2026-10-17.md",
+    "日志/日复盘/2026-10-16.md",
+    "日志/日复盘/2026-10-18.md",
+    "日志/周复盘/2026年/2026年10月/2026年10月第1周.md",
+    "日志/复盘目录/周复盘与规划目录/2026年10月.base",
+    "日志/复盘目录/周复盘与规划目录.base",
+    "日志/复盘目录/周复盘与规划目录/2026年11月.base",
+    "日志/复盘目录/周复盘与规划目录/2026年12月.base",
+    "日志/月复盘/2026年/2026年10月.md",
+    "日志/月复盘/2026年/2026年11月.md",
+    "日志/年复盘/2026年.md",
+    "日志/复盘目录/年复盘与规划目录.base",
+    "个人迭代/常青笔记/最低系统使用指南.md",
+    "个人迭代/笔记目录/常青笔记.base",
+    "个人迭代/笔记目录/系统笔记.base",
+    "模板/周复盘模板.md",
+    "模板/月复盘模板.md",
+    "模板/日志模板.md",
+    "日志/日复盘/2026-09-23.md",
+    "个人迭代/常青笔记/自我画像.md",
+    "日志/月复盘/2026年/2026年12月.md",
+    "个人迭代/常青笔记/迭代模式.md",
+    "个人迭代/常青笔记/卢曼卡片法.md",
+    "个人迭代/常青笔记/单一瓶颈变量.md",
+    "个人迭代/常青笔记/减法是更高级的构建.md",
+    "个人迭代/常青笔记/慢下来感受.md",
+    "个人迭代/常青笔记/最小启动阻力.md",
+    "个人迭代/常青笔记/焦虑茧房.md",
+    "个人迭代/常青笔记/封闭式验收.md",
+    "个人迭代/常青笔记/盖尔定律.md",
+    "个人迭代/系统笔记/AI使用/跑长期任务：防的是卡死，不是做错.md",
+    "个人迭代/菜谱/菜谱附件/番茄肉末意面/番茄肉末意面.jpg",
+    "个人迭代/菜谱/菜谱附件/青椒炒蛋/青椒炒蛋.jpg",
+    "个人迭代/菜谱/菜谱附件/辣椒炒肉/辣椒炒肉.jpg",
+    "个人迭代/菜谱/菜谱附件/可乐鸡翅/可乐鸡翅.jpg",
+    "个人迭代/菜谱/菜谱附件/蒜蓉粉丝虾/蒜蓉粉丝虾.jpg",
+    "个人迭代/菜谱/菜谱附件/凉拌牛肉片/凉拌牛肉片.jpg",
+    "个人迭代/菜谱/菜谱附件/水煮肉片/水煮肉片.jpg",
+    "个人迭代/菜谱/菜谱附件/蛋炒饭/蛋炒饭.jpg"
+  ]
+}

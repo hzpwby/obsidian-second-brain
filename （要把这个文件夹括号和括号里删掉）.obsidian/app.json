@@ -1,0 +1,21 @@
+{
+  "newFileLocation": "current",
+  "attachmentFolderPath": "附件",
+  "alwaysUpdateLinks": true,
+  "defaultViewMode": "preview",
+  "promptDelete": false,
+  "showInlineTitle": false,
+  "openBehavior": "file:🏠Home.canvas",
+  "vimMode": false,
+  "readableLineLength": true,
+  "showLineNumber": true,
+  "uriCallbacks": false,
+  "showUnsupportedFiles": true,
+  "pdfExportSettings": {
+    "includeName": false,
+    "pageSize": "A4",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 100
+  }
+}

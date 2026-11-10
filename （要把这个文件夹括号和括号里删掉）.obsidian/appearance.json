@@ -1,0 +1,12 @@
+{
+  "showRibbon": true,
+  "showViewHeader": false,
+  "cssTheme": "Everforest Enchanted",
+  "baseFontSize": 20,
+  "theme": "system",
+  "enabledCssSnippets": [
+    "隐藏任务搜索框",
+    "tracker横坐标横排"
+  ],
+  "baseFontSizeAction": false
+}

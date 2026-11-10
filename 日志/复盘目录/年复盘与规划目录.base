@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "日志/年复盘"
+views:
+  - type: cards
+    name: 表格
+    order:
+      - file.basename
+    cardSize: 380

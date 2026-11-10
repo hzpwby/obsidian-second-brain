@@ -1,0 +1,11 @@
+version: 1
+type: base
+filters:
+  and:
+    - file.folder == "个人迭代/菜谱/餐后甜点"
+views:
+  - type: cards
+    name: 餐后甜点
+    order:
+      - file.basename
+    cardSize: 310

@@ -1,0 +1,14 @@
+version: 1
+type: base
+filters:
+  and:
+    - file.folder == "个人迭代/菜谱/主食"
+views:
+  - type: cards
+    name: 主食
+    order:
+      - file.basename
+    cardSize: 200
+    imageField: cover
+    image: note.cover
+    imageAspectRatio: 1.45

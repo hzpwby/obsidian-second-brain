@@ -1,0 +1,14 @@
+filters:
+  and:
+    - file.folder == "个人迭代/常青笔记"
+views:
+  - type: cards
+    name: 常青笔记
+    groupBy:
+      property: file.tags
+      direction: ASC
+    order:
+      - file.name
+    sort: []
+    cardSize: 620
+    imageAspectRatio: 1.65

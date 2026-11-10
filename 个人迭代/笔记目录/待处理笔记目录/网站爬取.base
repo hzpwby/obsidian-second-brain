@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "个人迭代/待处理笔记/网站爬取"
+views:
+  - type: cards
+    name: 网站爬取
+    order:
+      - file.name
+    cardSize: 310

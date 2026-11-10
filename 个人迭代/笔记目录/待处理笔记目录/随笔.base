@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "个人迭代/待处理笔记/随笔"
+views:
+  - type: cards
+    name: 随笔
+    order:
+      - file.name
+    cardSize: 310

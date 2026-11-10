@@ -1,0 +1,10 @@
+filters:
+  and:
+    - file.folder == "个人迭代/笔记目录/系统笔记目录"
+views:
+  - type: cards
+    name: 系统笔记
+    order:
+      - file.basename
+    cardSize: 570
+    imageAspectRatio: 0.65

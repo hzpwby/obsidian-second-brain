@@ -1,0 +1,9 @@
+filters:
+  and:
+    - file.folder == "个人迭代/笔记目录/待处理笔记目录"
+views:
+  - type: cards
+    name: 待处理笔记
+    order:
+      - file.basename
+    cardSize: 310
